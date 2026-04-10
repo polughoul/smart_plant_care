@@ -28,14 +28,12 @@ import com.example.smart_plant_care.ui.screens.SettingsScreen
 @Composable
 fun MainScreen() {
     val navController = rememberNavController()
-    // Получаем текущий экран для переключения кнопок в меню
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    // Scaffold - это каркас экрана, куда мы вставляем BottomBar
+
     Scaffold(
         bottomBar = {
-            // Показываем нижнее меню только на главных экранах
             if (currentRoute == Screen.MyGarden.route || currentRoute == Screen.Settings.route) {
                 NavigationBar {
                     NavigationBarItem(
@@ -72,7 +70,9 @@ fun MainScreen() {
             startDestination = Screen.MyGarden.route,
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable(Screen.MyGarden.route) { MyGardenScreen() }
+            composable(Screen.MyGarden.route) { MyGardenScreen(
+                onNavigateToSearch = { navController.navigate(Screen.Search.route)})
+            }
             composable(Screen.Settings.route) { SettingsScreen() }
             composable(Screen.Search.route) { SearchScreen() }
             composable(Screen.Details.route) { DetailsScreen() }
