@@ -17,16 +17,19 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.smart_plant_care.data.repository.PlantRepository
 import com.example.smart_plant_care.ui.navigation.Screen
 import com.example.smart_plant_care.ui.screens.DetailsScreen
 import com.example.smart_plant_care.ui.screens.EditScreen
 import com.example.smart_plant_care.ui.screens.MyGardenScreen
 import com.example.smart_plant_care.ui.screens.SearchScreen
 import com.example.smart_plant_care.ui.screens.SettingsScreen
+import com.example.smart_plant_care.ui.viewmodels.GardenViewModel
+import com.example.smart_plant_care.ui.viewmodels.GardenViewModelFactory
 
 
 @Composable
-fun MainScreen() {
+fun MainScreen(repository: PlantRepository) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -70,8 +73,11 @@ fun MainScreen() {
             startDestination = Screen.MyGarden.route,
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable(Screen.MyGarden.route) { MyGardenScreen(
-                onNavigateToSearch = { navController.navigate(Screen.Search.route)})
+            composable(Screen.MyGarden.route) {
+                val viewModel: GardenViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+                    factory = GardenViewModelFactory(repository)
+                )
+                MyGardenScreen(viewModel = viewModel, onNavigateToSearch = { navController.navigate(Screen.Search.route)})
             }
             composable(Screen.Settings.route) { SettingsScreen() }
             composable(Screen.Search.route) { SearchScreen() }
