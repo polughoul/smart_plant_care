@@ -11,21 +11,24 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.smart_plant_care.data.local.entity.MyPlantEntity
 import com.example.smart_plant_care.data.repository.PlantRepository
 import com.example.smart_plant_care.ui.navigation.Screen
-import com.example.smart_plant_care.ui.screens.DetailsScreen
 import com.example.smart_plant_care.ui.screens.EditScreen
 import com.example.smart_plant_care.ui.screens.MyGardenScreen
 import com.example.smart_plant_care.ui.screens.SearchScreen
 import com.example.smart_plant_care.ui.screens.SettingsScreen
 import com.example.smart_plant_care.ui.viewmodels.GardenViewModel
 import com.example.smart_plant_care.ui.viewmodels.GardenViewModelFactory
+import com.example.smartplantcare.ui.screens.DetailsScreen
+import kotlinx.coroutines.launch
 
 
 @Composable
@@ -80,10 +83,45 @@ fun MainScreen(repository: PlantRepository) {
                 MyGardenScreen(viewModel = viewModel, onNavigateToSearch = { navController.navigate(Screen.Search.route)})
             }
             composable(Screen.Settings.route) { SettingsScreen() }
-            composable(Screen.Search.route) { SearchScreen() }
-            composable(Screen.Details.route) { DetailsScreen() }
-            composable(Screen.Edit.route) { EditScreen() }
+            composable(Screen.Search.route) {
+                SearchScreen(
+                    onBackClick = { navController.popBackStack() },
+                    onPlantClick = { plantId ->
+                        navController.navigate(Screen.Details.createRoute(plantId))
+                    }
+                )
+            }
+            composable("details/{apiId}") { backStackEntry ->
+                val plantId = backStackEntry.arguments?.getString("apiId")?.toIntOrNull() ?: 0
+                DetailsScreen(
+                    plantId = plantId,
+                    onBackClick = { navController.popBackStack() },
+                    onAddClick = { speciesName ->
+                        navController.navigate("edit/$speciesName")
+                    }
+                )
+            }
+            composable("edit/{speciesName}") { backStackEntry ->
+                val speciesName = backStackEntry.arguments?.getString("speciesName") ?: "Неизвестно"
+                val coroutineScope = rememberCoroutineScope()
+
+                EditScreen(
+                    speciesName = speciesName,
+                    onBackClick = { navController.popBackStack() },
+                    onSaveClick = { customName, waterDays ->
+                        val newPlant = MyPlantEntity(
+                            customName = customName,
+                            speciesName = speciesName,
+                            waterIntervalDays = waterDays,
+                            nextWateringDate = System.currentTimeMillis() + (waterDays * 24L * 60 * 60 * 1000)
+                        )
+                        coroutineScope.launch { repository.insertPlant(newPlant) }
+                        navController.popBackStack(Screen.MyGarden.route, inclusive = false)
+                    }
+                )
+            }
         }
     }
 }
+
 

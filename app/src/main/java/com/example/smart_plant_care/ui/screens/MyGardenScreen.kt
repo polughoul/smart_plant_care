@@ -70,8 +70,8 @@ fun MyGardenScreen(viewModel: GardenViewModel, onNavigateToSearch: () -> Unit) {
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { viewModel.addTestPlant() }) {
-                Icon(Icons.Default.Add, contentDescription = "Add plant")
+            FloatingActionButton(onClick = onNavigateToSearch) {
+                Icon(Icons.Default.Add, contentDescription = "find plant")
             }
         }
     ) { paddingValues ->
