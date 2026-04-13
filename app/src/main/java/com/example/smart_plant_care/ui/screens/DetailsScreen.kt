@@ -80,12 +80,11 @@ fun DetailsScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Характеристики
                     Card(modifier = Modifier.fillMaxWidth()) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            Text("☀️ Солнце: ${plant.sunlight?.joinToString() ?: "Неизвестно"}")
+                            Text("☀️ Sun heat: ${plant.sunlight?.joinToString() ?: "Unknown"}")
                             Spacer(modifier = Modifier.height(8.dp))
-                            Text("💧 Полив: ${plant.watering ?: "Неизвестно"}")
+                            Text("💧 Water: ${plant.watering ?: "Unknown"}")
                         }
                     }
                 }

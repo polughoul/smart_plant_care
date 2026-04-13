@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
@@ -54,6 +55,15 @@ fun SearchScreen(onBackClick: () -> Unit, onPlantClick: (Int) -> Unit, searchVie
                     }
                 }
             )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(onClick = { onPlantClick(-1)}, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary))
+            {
+                Icon(Icons.Default.Add, contentDescription = null)
+                Spacer(Modifier.width(8.dp))
+                Text("Create new plant")
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
 
             if (isLoading) {

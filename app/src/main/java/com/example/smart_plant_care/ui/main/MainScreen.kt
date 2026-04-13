@@ -87,7 +87,11 @@ fun MainScreen(repository: PlantRepository) {
                 SearchScreen(
                     onBackClick = { navController.popBackStack() },
                     onPlantClick = { plantId ->
-                        navController.navigate(Screen.Details.createRoute(plantId))
+                        if (plantId == -1) {
+                            navController.navigate(Screen.Edit.createRoute("New Plant"))
+                        } else {
+                            navController.navigate(Screen.Details.createRoute(plantId))
+                        }
                     }
                 )
             }
@@ -97,12 +101,13 @@ fun MainScreen(repository: PlantRepository) {
                     plantId = plantId,
                     onBackClick = { navController.popBackStack() },
                     onAddClick = { speciesName ->
-                        navController.navigate("edit/$speciesName")
+                        navController.navigate(Screen.Edit.createRoute(speciesName))
                     }
                 )
             }
-            composable("edit/{speciesName}") { backStackEntry ->
-                val speciesName = backStackEntry.arguments?.getString("speciesName") ?: "Неизвестно"
+            composable(Screen.Edit.route) { backStackEntry ->
+                val speciesName = backStackEntry.arguments?.getString("speciesName") ?: "Plant"
+
                 val coroutineScope = rememberCoroutineScope()
 
                 EditScreen(
@@ -115,7 +120,9 @@ fun MainScreen(repository: PlantRepository) {
                             waterIntervalDays = waterDays,
                             nextWateringDate = System.currentTimeMillis() + (waterDays * 24L * 60 * 60 * 1000)
                         )
-                        coroutineScope.launch { repository.insertPlant(newPlant) }
+                        coroutineScope.launch {
+                            repository.insertPlant(newPlant)
+                        }
                         navController.popBackStack(Screen.MyGarden.route, inclusive = false)
                     }
                 )

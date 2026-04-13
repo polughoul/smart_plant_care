@@ -16,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.material.icons.filled.Delete
 import com.example.smart_plant_care.ui.viewmodels.GardenViewModel
 
 
@@ -48,6 +49,15 @@ fun PlantCard(name: String, status: String){
             Column{
                 Text(text = name, style = MaterialTheme.typography.titleMedium)
                 Text(text = status, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+            IconButton(onClick = { }) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Delete",
+                    tint = MaterialTheme.colorScheme.error
+                )
             }
         }
     }
@@ -91,10 +101,21 @@ fun MyGardenScreen(viewModel: GardenViewModel, onNavigateToSearch: () -> Unit) {
                 items(plants) { plant ->
                     PlantCard(
                         name = plant.customName,
-                        status = "Next watering in ${plant.waterIntervalDays} days"
+                        status = calculateDaysRemaining(plant.nextWateringDate)
                     )
                 }
             }
         }
+    }
+}
+
+fun calculateDaysRemaining(nextWateringMillis: Long): String {
+    val diff = nextWateringMillis - System.currentTimeMillis()
+    val days = (diff / (24 * 60 * 60 * 1000)).toInt()
+    return when {
+        days < 0 -> "Need to water immediatly"
+        days == 0 -> "Water today"
+        days == 1 -> "Water tomorrow"
+        else -> "Water after $days days"
     }
 }
