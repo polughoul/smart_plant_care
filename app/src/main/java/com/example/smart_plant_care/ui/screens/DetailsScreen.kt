@@ -1,4 +1,4 @@
-package com.example.smartplantcare.ui.screens
+package com.example.smart_plant_care.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -14,14 +14,16 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.example.smart_plant_care.data.remote.dto.PlantDetailsDto
 import com.example.smart_plant_care.ui.viewmodels.DetailsViewModel
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailsScreen(
     plantId: Int,
     onBackClick: () -> Unit,
-    onAddClick: (String, Int) -> Unit,
+    onAddClick: (PlantDetailsDto, Int) -> Unit,
     detailsViewModel: DetailsViewModel = viewModel()
 ) {
     val details by detailsViewModel.plantDetails.collectAsState()
@@ -46,7 +48,7 @@ fun DetailsScreen(
                     onClick = {
                         val benchmark = details?.wateringBenchmark?.value
                         val days = benchmark?.split("-")?.firstOrNull()?.trim()?.toIntOrNull() ?: 7
-                        onAddClick(details!!.commonName, days)
+                        onAddClick(details!!, days)
                     },
                     icon = { Icon(Icons.Default.Add, "Add") },
                     text = { Text("Add to garden") }
@@ -86,9 +88,12 @@ fun DetailsScreen(
 
                     Card(modifier = Modifier.fillMaxWidth()) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            Text("☀️ Sun heat: ${plant.sunlight?.joinToString() ?: "Unknown"}")
+                            val sunlightText = plant.sunlight?.joinToString()?.takeIf { it.isNotBlank() } ?: "Unknown"
+                            val wateringText = plant.watering?.takeIf { it.isNotBlank() } ?: "Unknown"
+
+                            Text("☀️ Sun heat: $sunlightText")
                             Spacer(modifier = Modifier.height(8.dp))
-                            Text("💧 Water: ${plant.watering ?: "Unknown"}")
+                            Text("💧 Water: $wateringText")
                         }
                     }
                 }

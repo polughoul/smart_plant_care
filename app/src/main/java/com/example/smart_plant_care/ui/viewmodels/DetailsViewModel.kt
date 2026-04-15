@@ -2,6 +2,7 @@ package com.example.smart_plant_care.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.smart_plant_care.BuildConfig
 import com.example.smart_plant_care.data.remote.api.RetrofitClient
 import com.example.smart_plant_care.data.remote.dto.PlantDetailsDto
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,7 +12,7 @@ import kotlinx.coroutines.launch
 
 class DetailsViewModel() : ViewModel() {
 
-    private val API_KEY = "sk-4Dpr69dbba30180ee16358"
+    private val apiKey = BuildConfig.PERENUAL_API_KEY
 
     private val _plantDetails = MutableStateFlow<PlantDetailsDto?>(null)
     val plantDetails: StateFlow<PlantDetailsDto?> = _plantDetails
@@ -21,9 +22,15 @@ class DetailsViewModel() : ViewModel() {
 
     fun loadPlantDetails(plantId: Int) {
         viewModelScope.launch {
+            if (apiKey.isBlank()) {
+                _plantDetails.value = null
+                _isLoading.value = false
+                return@launch
+            }
+
             _isLoading.value = true
             try {
-                val response = RetrofitClient.apiService.getPlantDetails(plantId, API_KEY)
+                val response = RetrofitClient.apiService.getPlantDetails(plantId, apiKey)
                 _plantDetails.value = response
             } catch (e: Exception) {
                 e.printStackTrace()

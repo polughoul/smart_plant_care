@@ -21,7 +21,7 @@ import com.example.smart_plant_care.ui.viewmodels.GardenViewModel
 
 
 @Composable
-fun PlantCard(name: String, status: String){
+fun PlantCard(name: String, status: String, onDeleteClick: () -> Unit){
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -52,7 +52,7 @@ fun PlantCard(name: String, status: String){
             }
 
             Spacer(modifier = Modifier.weight(1f))
-            IconButton(onClick = { }) {
+            IconButton(onClick = onDeleteClick) {
                 Icon(
                     imageVector = Icons.Default.Delete,
                     contentDescription = "Delete",
@@ -101,7 +101,8 @@ fun MyGardenScreen(viewModel: GardenViewModel, onNavigateToSearch: () -> Unit) {
                 items(plants) { plant ->
                     PlantCard(
                         name = plant.customName,
-                        status = calculateDaysRemaining(plant.nextWateringDate)
+                        status = calculateDaysRemaining(plant.nextWateringDate),
+                        onDeleteClick = {  viewModel.deletePlant(plant.id) }
                     )
                 }
             }

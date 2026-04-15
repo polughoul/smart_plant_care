@@ -1,4 +1,4 @@
-package com.example.smartplantcare.ui.main
+package com.example.smart_plant_care.ui.main
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -11,7 +11,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -27,7 +30,7 @@ import com.example.smart_plant_care.ui.screens.SearchScreen
 import com.example.smart_plant_care.ui.screens.SettingsScreen
 import com.example.smart_plant_care.ui.viewmodels.GardenViewModel
 import com.example.smart_plant_care.ui.viewmodels.GardenViewModelFactory
-import com.example.smartplantcare.ui.screens.DetailsScreen
+import com.example.smart_plant_care.ui.screens.DetailsScreen
 import kotlinx.coroutines.launch
 import java.net.URLDecoder.decode
 
@@ -37,6 +40,8 @@ fun MainScreen(repository: PlantRepository) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+
+    var sharedPlantDetails by remember { mutableStateOf<com.example.smart_plant_care.data.remote.dto.PlantDetailsDto?>(null) }
 
 
     Scaffold(
@@ -81,7 +86,7 @@ fun MainScreen(repository: PlantRepository) {
                 val viewModel: GardenViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
                     factory = GardenViewModelFactory(repository)
                 )
-                MyGardenScreen(viewModel = viewModel, onNavigateToSearch = { navController.navigate(Screen.Search.route)})
+                MyGardenScreen(viewModel = viewModel, onNavigateToSearch = { navController.navigate(Screen.Search.route) })
             }
             composable(Screen.Settings.route) { SettingsScreen() }
             composable(Screen.Search.route) {
@@ -89,30 +94,28 @@ fun MainScreen(repository: PlantRepository) {
                     onBackClick = { navController.popBackStack() },
                     onPlantClick = { plantId ->
                         if (plantId == -1) {
-                            navController.navigate(Screen.Edit.createRoute("New Plant", 7))
+                            sharedPlantDetails = null
+                            navController.navigate(Screen.Edit.createRoute("Manual Entry", 7))
                         } else {
                             navController.navigate(Screen.Details.createRoute(plantId))
                         }
                     }
                 )
             }
-
             composable(Screen.Details.route) { backStackEntry ->
                 val plantId = backStackEntry.arguments?.getString("apiId")?.toIntOrNull() ?: 0
                 DetailsScreen(
                     plantId = plantId,
                     onBackClick = { navController.popBackStack() },
-                    onAddClick = { speciesName, defaultWaterDays ->
-                        navController.navigate(Screen.Edit.createRoute(speciesName, defaultWaterDays))
+                    onAddClick = { detailsDto, defaultWaterDays ->
+                        sharedPlantDetails = detailsDto
+                        navController.navigate(Screen.Edit.createRoute(detailsDto.commonName, defaultWaterDays))
                     }
                 )
             }
-
             composable(Screen.Edit.route) { backStackEntry ->
-
                 val rawName = backStackEntry.arguments?.getString("speciesName") ?: "Plant"
                 val speciesName = decode(rawName, "UTF-8")
-
                 val defaultWaterDays = backStackEntry.arguments?.getString("defaultWater")?.toIntOrNull() ?: 7
 
                 val coroutineScope = rememberCoroutineScope()
@@ -125,12 +128,25 @@ fun MainScreen(repository: PlantRepository) {
                         val newPlant = MyPlantEntity(
                             customName = customName,
                             speciesName = speciesName,
+                            scientificName = sharedPlantDetails?.scientificName?.firstOrNull(),
+                            family = sharedPlantDetails?.family,
+                            origin = sharedPlantDetails?.origin?.joinToString(),
+                            plantType = sharedPlantDetails?.type,
+                            sunlight = sharedPlantDetails?.sunlight?.joinToString(),
+                            attracts = sharedPlantDetails?.attracts?.joinToString(),
                             waterIntervalDays = waterDays,
-                            nextWateringDate = System.currentTimeMillis() + (waterDays * 24L * 60 * 60 * 1000)
+                            nextWateringDate = System.currentTimeMillis() + (waterDays * 24L * 60 * 60 * 1000),
+                            fruitingSeason = sharedPlantDetails?.fruitingSeason,
+                            harvestSeason = sharedPlantDetails?.harvestSeason,
+                            harvestMethod = sharedPlantDetails?.harvestMethod,
+                            isMedicinal = sharedPlantDetails?.medicinal ?: false,
+                            isPoisonousToHumans = sharedPlantDetails?.poisonousToHumans ?: false,
+                            isPoisonousToPets = sharedPlantDetails?.poisonousToPets ?: false,
+                            imageUrl = sharedPlantDetails?.defaultImage?.regularUrl ?: sharedPlantDetails?.defaultImage?.thumbnail
                         )
-                        coroutineScope.launch {
-                            repository.insertPlant(newPlant)
-                        }
+                        coroutineScope.launch { repository.insertPlant(newPlant) }
+
+                        sharedPlantDetails = null
                         navController.popBackStack(Screen.MyGarden.route, inclusive = false)
                     }
                 )

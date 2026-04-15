@@ -10,7 +10,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditScreen(
@@ -19,48 +18,46 @@ fun EditScreen(
     onSaveClick: (String, Int) -> Unit,
     onBackClick: () -> Unit
 ) {
+    val isManual = speciesName == "Manual Entry"
     var customName by remember { mutableStateOf("") }
-    var waterDays by remember { mutableStateOf(3f) }
+    var waterDays by remember { mutableStateOf(defaultWaterDays.toFloat()) }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Plant Settings") },
+                title = { Text(if (isManual) "Create New Plant" else "Plant Settings") },
                 navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                    }
+                    IconButton(onClick = onBackClick) { Icon(Icons.Default.ArrowBack, "Back") }
                 }
             )
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = {
-                    val finalName = customName.ifBlank { speciesName }
+                    val finalName = if (customName.isNotBlank()) customName else if (isManual) "My Plant" else speciesName
                     onSaveClick(finalName, waterDays.roundToInt())
                 },
-                icon = { Icon(Icons.Default.Check, contentDescription = "Save") },
+                icon = { Icon(Icons.Default.Check, "Save") },
                 text = { Text("Save to Garden") }
             )
         }
     ) { paddingValues ->
         Column(
-            modifier = Modifier
-                .padding(paddingValues)
-                .padding(16.dp)
-                .fillMaxSize(),
+            modifier = Modifier.padding(paddingValues).padding(16.dp).fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            Text(
-                text = "Selected: $speciesName",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
+            if (!isManual) {
+                Text(
+                    text = "Selected: $speciesName",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
 
             OutlinedTextField(
                 value = customName,
                 onValueChange = { customName = it },
-                label = { Text("Give it a name?") },
+                label = { Text(if (isManual) "Plant Name (Required)" else "Custom Name (Optional)") },
                 placeholder = { Text("e.g. My Kitchen Ficus") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true

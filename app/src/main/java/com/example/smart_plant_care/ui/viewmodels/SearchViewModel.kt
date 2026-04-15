@@ -2,6 +2,7 @@ package com.example.smart_plant_care.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.smart_plant_care.BuildConfig
 import com.example.smart_plant_care.data.remote.api.RetrofitClient
 import com.example.smart_plant_care.data.remote.dto.ApiPlantDto
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,7 +12,7 @@ import kotlinx.coroutines.launch
 
 class SearchViewModel: ViewModel() {
 
-    private val API_KEY = "sk-4Dpr69dbba30180ee16358"
+    private val apiKey = BuildConfig.PERENUAL_API_KEY
 
     private val _searchResults = MutableStateFlow<List<ApiPlantDto>>(emptyList())
 
@@ -22,11 +23,16 @@ class SearchViewModel: ViewModel() {
 
     fun searchPlants(query: String) {
         if (query.isBlank()) return
+        if (apiKey.isBlank()) {
+            _searchResults.value = emptyList()
+            _isLoading.value = false
+            return
+        }
 
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                val response = RetrofitClient.apiService.searchPlants(query, API_KEY)
+                val response = RetrofitClient.apiService.searchPlants(query, apiKey)
                 _searchResults.value = response.data
             } catch (e: Exception) {
                 e.printStackTrace()

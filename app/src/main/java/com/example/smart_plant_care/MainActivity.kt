@@ -11,7 +11,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.example.smart_plant_care.data.local.db.AppDatabase
 import com.example.smart_plant_care.data.repository.PlantRepository
 import com.example.smart_plant_care.ui.theme.Smart_Plant_CareTheme
-import com.example.smartplantcare.ui.main.MainScreen
+import com.example.smart_plant_care.ui.main.MainScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
