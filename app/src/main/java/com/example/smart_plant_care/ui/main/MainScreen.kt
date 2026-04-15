@@ -29,6 +29,7 @@ import com.example.smart_plant_care.ui.viewmodels.GardenViewModel
 import com.example.smart_plant_care.ui.viewmodels.GardenViewModelFactory
 import com.example.smartplantcare.ui.screens.DetailsScreen
 import kotlinx.coroutines.launch
+import java.net.URLDecoder.decode
 
 
 @Composable
@@ -88,30 +89,37 @@ fun MainScreen(repository: PlantRepository) {
                     onBackClick = { navController.popBackStack() },
                     onPlantClick = { plantId ->
                         if (plantId == -1) {
-                            navController.navigate(Screen.Edit.createRoute("New Plant"))
+                            navController.navigate(Screen.Edit.createRoute("New Plant", 7))
                         } else {
                             navController.navigate(Screen.Details.createRoute(plantId))
                         }
                     }
                 )
             }
-            composable("details/{apiId}") { backStackEntry ->
+
+            composable(Screen.Details.route) { backStackEntry ->
                 val plantId = backStackEntry.arguments?.getString("apiId")?.toIntOrNull() ?: 0
                 DetailsScreen(
                     plantId = plantId,
                     onBackClick = { navController.popBackStack() },
-                    onAddClick = { speciesName ->
-                        navController.navigate(Screen.Edit.createRoute(speciesName))
+                    onAddClick = { speciesName, defaultWaterDays ->
+                        navController.navigate(Screen.Edit.createRoute(speciesName, defaultWaterDays))
                     }
                 )
             }
+
             composable(Screen.Edit.route) { backStackEntry ->
-                val speciesName = backStackEntry.arguments?.getString("speciesName") ?: "Plant"
+
+                val rawName = backStackEntry.arguments?.getString("speciesName") ?: "Plant"
+                val speciesName = decode(rawName, "UTF-8")
+
+                val defaultWaterDays = backStackEntry.arguments?.getString("defaultWater")?.toIntOrNull() ?: 7
 
                 val coroutineScope = rememberCoroutineScope()
 
                 EditScreen(
                     speciesName = speciesName,
+                    defaultWaterDays = defaultWaterDays,
                     onBackClick = { navController.popBackStack() },
                     onSaveClick = { customName, waterDays ->
                         val newPlant = MyPlantEntity(

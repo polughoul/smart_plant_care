@@ -8,7 +8,7 @@ import com.example.smart_plant_care.data.local.dao.PlantDao
 import com.example.smart_plant_care.data.local.entity.MyPlantEntity
 
 
-@Database(entities = [MyPlantEntity::class], version = 1, exportSchema = false)
+@Database(entities = [MyPlantEntity::class], version = 2, exportSchema = false)
 abstract class AppDatabase: RoomDatabase() {
     abstract fun plantDao(): PlantDao
 
@@ -22,9 +22,11 @@ abstract class AppDatabase: RoomDatabase() {
                         context.applicationContext,
                         AppDatabase::class.java,
                         "app_database"
-                    ).build()
-                    INSTANCE = instance
-                    instance
+                    )
+                        .fallbackToDestructiveMigration()
+                        .build()
+                        INSTANCE = instance
+                        instance
             }
         }
     }

@@ -1,6 +1,6 @@
 package com.example.smart_plant_care.ui.navigation
 
-import java.net.URLEncoder
+import java.net.URLEncoder.encode
 import java.nio.charset.StandardCharsets
 
 sealed class Screen(val route: String) {
@@ -11,10 +11,10 @@ sealed class Screen(val route: String) {
     object Details : Screen("details/{apiId}"){
         fun createRoute(apiId:Int) = "details/$apiId"
     }
-    object Edit : Screen("edit/{speciesName}") {
-        fun createRoute(speciesName: String): String {
-            val encodedName = URLEncoder.encode(speciesName, StandardCharsets.UTF_8.toString())
-            return "edit/$encodedName"
+    object Edit : Screen("edit/{speciesName}/{defaultWater}") {
+        fun createRoute(speciesName: String, defaultWater: Int): String {
+            val encodedName = encode(speciesName, "UTF-8")
+            return "edit/$encodedName/$defaultWater"
         }
     }
 

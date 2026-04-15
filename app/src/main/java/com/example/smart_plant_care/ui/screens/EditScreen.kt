@@ -15,6 +15,7 @@ import kotlin.math.roundToInt
 @Composable
 fun EditScreen(
     speciesName: String,
+    defaultWaterDays: Int,
     onSaveClick: (String, Int) -> Unit,
     onBackClick: () -> Unit
 ) {

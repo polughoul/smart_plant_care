@@ -21,7 +21,7 @@ import com.example.smart_plant_care.ui.viewmodels.DetailsViewModel
 fun DetailsScreen(
     plantId: Int,
     onBackClick: () -> Unit,
-    onAddClick: (String) -> Unit,
+    onAddClick: (String, Int) -> Unit,
     detailsViewModel: DetailsViewModel = viewModel()
 ) {
     val details by detailsViewModel.plantDetails.collectAsState()
@@ -43,7 +43,11 @@ fun DetailsScreen(
         floatingActionButton = {
             if (details != null) {
                 ExtendedFloatingActionButton(
-                    onClick = { onAddClick(details!!.commonName) },
+                    onClick = {
+                        val benchmark = details?.wateringBenchmark?.value
+                        val days = benchmark?.split("-")?.firstOrNull()?.trim()?.toIntOrNull() ?: 7
+                        onAddClick(details!!.commonName, days)
+                    },
                     icon = { Icon(Icons.Default.Add, "Add") },
                     text = { Text("Add to garden") }
                 )
