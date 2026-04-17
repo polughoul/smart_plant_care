@@ -1,6 +1,5 @@
 package com.example.smart_plant_care.ui.screens
 
-import android.icu.text.StringSearch
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,6 +12,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -68,6 +70,19 @@ fun PlantCard(name: String, status: String, onDeleteClick: () -> Unit){
 fun MyGardenScreen(viewModel: GardenViewModel, onNavigateToSearch: () -> Unit) {
 
     val plants by viewModel.plantsList.collectAsState()
+    var searchQuery by remember { mutableStateOf("") }
+
+    val filteredPlants = remember(plants, searchQuery) {
+        if (searchQuery.isBlank()) {
+            plants
+        } else {
+            val query = searchQuery.trim().lowercase()
+            plants.filter { plant ->
+                plant.customName.lowercase().contains(query) ||
+                    plant.speciesName.lowercase().contains(query)
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -91,19 +106,46 @@ fun MyGardenScreen(viewModel: GardenViewModel, onNavigateToSearch: () -> Unit) {
                 Text("No plants yet")
             }
         } else {
-            LazyColumn(
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                    .padding(paddingValues)
+                    .padding(horizontal = 16.dp)
             ) {
-                items(plants) { plant ->
-                    PlantCard(
-                        name = plant.customName,
-                        status = calculateDaysRemaining(plant.nextWateringDate),
-                        onDeleteClick = {  viewModel.deletePlant(plant.id) }
-                    )
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp),
+                    label = { Text("Search in my garden") },
+                    placeholder = { Text("e.g. ficus") },
+                    singleLine = true
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                if (filteredPlants.isEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("No matching plants")
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(bottom = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(filteredPlants) { plant ->
+                            PlantCard(
+                                name = plant.customName,
+                                status = calculateDaysRemaining(plant.nextWateringDate),
+                                onDeleteClick = { viewModel.deletePlant(plant.id) }
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -114,7 +156,7 @@ fun calculateDaysRemaining(nextWateringMillis: Long): String {
     val diff = nextWateringMillis - System.currentTimeMillis()
     val days = (diff / (24 * 60 * 60 * 1000)).toInt()
     return when {
-        days < 0 -> "Need to water immediatly"
+        days < 0 -> "Need to water immediately"
         days == 0 -> "Water today"
         days == 1 -> "Water tomorrow"
         else -> "Water after $days days"
