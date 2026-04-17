@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.example.smart_plant_care.data.local.entity.MyPlantEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -15,6 +16,9 @@ interface PlantDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertPlant(plant: MyPlantEntity)
+
+    @Update
+    fun updatePlant(plant: MyPlantEntity)
 
     @Query("DELETE FROM my_plants WHERE id = :plantId")
     fun deletePlantById(plantId: Int)

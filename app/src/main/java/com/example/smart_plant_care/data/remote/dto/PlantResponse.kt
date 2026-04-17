@@ -7,10 +7,25 @@ data class PlantListResponce(
     @SerializedName("data") val data: List<ApiPlantDto>
 )
 
+data class CareGuideListResponse(
+    @SerializedName("data") val data: List<CareGuideDto>
+)
+
+data class CareGuideDto(
+    @SerializedName("section") val section: List<CareSectionDto>?
+)
+
+data class CareSectionDto(
+    @SerializedName("type") val type: String?,
+    @SerializedName("description") val description: String?
+)
+
 data class ApiPlantDto(
     @SerializedName("id") val id: Int,
     @SerializedName("common_name") val commonName: String,
     @SerializedName("scientific_name") val scientificName: List<String>?,
+    @SerializedName("watering") val watering: String?,
+    @SerializedName("sunlight") val sunlight: List<String>?,
     @SerializedName("default_image") val defaultImage: PlantImage?
 )
 

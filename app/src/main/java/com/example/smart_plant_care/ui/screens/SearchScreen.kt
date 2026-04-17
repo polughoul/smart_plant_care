@@ -131,6 +131,10 @@ fun SearchScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ApiPlantCard(plant: ApiPlantDto, onClick: () -> Unit) {
+    val scientificText = plant.scientificName?.firstOrNull()?.takeIf { it.isNotBlank() } ?: "Unknown"
+    val wateringText = plant.watering?.takeIf { it.isNotBlank() }
+    val sunlightText = plant.sunlight?.joinToString()?.takeIf { it.isNotBlank() }
+
     Card(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
         Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
             AsyncImage(
@@ -142,10 +146,20 @@ fun ApiPlantCard(plant: ApiPlantDto, onClick: () -> Unit) {
             Spacer(modifier = Modifier.width(16.dp))
             Column {
                 Text(text = plant.commonName, style = MaterialTheme.typography.titleMedium)
-                Text(
-                    text = plant.scientificName?.firstOrNull() ?: "Unknown",
-                    style = MaterialTheme.typography.bodySmall
-                )
+                Text(text = scientificText, style = MaterialTheme.typography.bodySmall)
+                if (wateringText != null) {
+                    Text(text = "Watering: $wateringText", style = MaterialTheme.typography.bodySmall)
+                }
+                if (sunlightText != null) {
+                    Text(text = "Sunlight: $sunlightText", style = MaterialTheme.typography.bodySmall)
+                }
+                if (wateringText == null && sunlightText == null) {
+                    Text(
+                        text = "No watering/sunlight data in search response",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         }
     }

@@ -5,10 +5,13 @@ import androidx.lifecycle.viewModelScope
 import com.example.smart_plant_care.BuildConfig
 import com.example.smart_plant_care.data.remote.api.RetrofitClient
 import com.example.smart_plant_care.data.remote.dto.ApiPlantDto
+import java.io.IOException
+import java.net.SocketTimeoutException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 
 sealed interface SearchUiState {
     data object Idle : SearchUiState
@@ -51,8 +54,8 @@ class SearchViewModel : ViewModel() {
                 } else {
                     SearchUiState.Success(plants)
                 }
-            } catch (_: Exception) {
-                _uiState.value = SearchUiState.Error("Failed to load plants. Check internet connection and try again.")
+            } catch (exception: Exception) {
+                _uiState.value = SearchUiState.Error(mapSearchError(exception))
             }
         }
     }
@@ -60,6 +63,21 @@ class SearchViewModel : ViewModel() {
     fun retryLastSearch() {
         if (lastQuery.isNotBlank()) {
             searchPlants(lastQuery)
+        }
+    }
+
+    private fun mapSearchError(exception: Exception): String {
+        return when (exception) {
+            is HttpException -> when (exception.code()) {
+                401, 403 -> "API key is invalid or unauthorized. Check PERENUAL_API_KEY in local.properties."
+                404 -> "Plant API endpoint not found (HTTP 404)."
+                429 -> "API rate limit reached. Wait a minute and retry."
+                in 500..599 -> "Plant API temporary server error (${exception.code()}). Try again later."
+                else -> "Plant API request failed (HTTP ${exception.code()})."
+            }
+            is SocketTimeoutException -> "Request timeout. Check internet connection and retry."
+            is IOException -> "No internet connection or network error."
+            else -> "Failed to load plants. Try again."
         }
     }
 }

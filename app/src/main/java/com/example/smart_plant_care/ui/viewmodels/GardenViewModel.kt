@@ -27,6 +27,18 @@ class GardenViewModel(private val repository: PlantRepository) : ViewModel() {
             repository.deletePlant(plantId)
         }
     }
+
+    fun insertPlant(plant: MyPlantEntity) {
+        viewModelScope.launch {
+            repository.insertPlant(plant)
+        }
+    }
+
+    fun updatePlant(plant: MyPlantEntity) {
+        viewModelScope.launch {
+            repository.updatePlant(plant)
+        }
+    }
 }
 
 class GardenViewModelFactory(private val repository: PlantRepository) : ViewModelProvider.Factory {

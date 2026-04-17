@@ -10,10 +10,10 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -25,6 +25,7 @@ import com.example.smart_plant_care.data.local.entity.MyPlantEntity
 import com.example.smart_plant_care.data.repository.PlantRepository
 import com.example.smart_plant_care.ui.navigation.Screen
 import com.example.smart_plant_care.ui.screens.EditScreen
+import com.example.smart_plant_care.ui.screens.GardenPlantDetailsScreen
 import com.example.smart_plant_care.ui.screens.MyGardenScreen
 import com.example.smart_plant_care.ui.screens.SearchScreen
 import com.example.smart_plant_care.ui.screens.SettingsScreen
@@ -32,13 +33,15 @@ import com.example.smart_plant_care.ui.viewmodels.GardenViewModel
 import com.example.smart_plant_care.ui.viewmodels.GardenViewModelFactory
 import com.example.smart_plant_care.ui.screens.DetailsScreen
 import com.example.smart_plant_care.ui.viewmodels.SettingsViewModel
-import kotlinx.coroutines.launch
 import java.net.URLDecoder.decode
 
 
 @Composable
 fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel) {
     val navController = rememberNavController()
+    val gardenViewModel: GardenViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+        factory = GardenViewModelFactory(repository)
+    )
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
@@ -84,10 +87,16 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.MyGarden.route) {
-                val viewModel: GardenViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
-                    factory = GardenViewModelFactory(repository)
+                MyGardenScreen(
+                    viewModel = gardenViewModel,
+                    onNavigateToSearch = { navController.navigate(Screen.Search.route) },
+                    onEditPlant = { plantId ->
+                        navController.navigate(Screen.EditExisting.createRoute(plantId))
+                    },
+                    onOpenPlantDetails = { plantId ->
+                        navController.navigate(Screen.GardenDetails.createRoute(plantId))
+                    }
                 )
-                MyGardenScreen(viewModel = viewModel, onNavigateToSearch = { navController.navigate(Screen.Search.route) })
             }
             composable(Screen.Settings.route) {
                 SettingsScreen(settingsViewModel = settingsViewModel)
@@ -121,8 +130,6 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
                 val speciesName = decode(rawName, "UTF-8")
                 val defaultWaterDays = backStackEntry.arguments?.getString("defaultWater")?.toIntOrNull() ?: 7
 
-                val coroutineScope = rememberCoroutineScope()
-
                 EditScreen(
                     speciesName = speciesName,
                     defaultWaterDays = defaultWaterDays,
@@ -147,11 +154,47 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
                             isPoisonousToPets = sharedPlantDetails?.poisonousToPets ?: false,
                             imageUrl = sharedPlantDetails?.defaultImage?.regularUrl ?: sharedPlantDetails?.defaultImage?.thumbnail
                         )
-                        coroutineScope.launch { repository.insertPlant(newPlant) }
+                        gardenViewModel.insertPlant(newPlant)
 
                         sharedPlantDetails = null
                         navController.popBackStack(Screen.MyGarden.route, inclusive = false)
                     }
+                )
+            }
+            composable(Screen.EditExisting.route) { backStackEntry ->
+                val plantId = backStackEntry.arguments?.getString("plantId")?.toIntOrNull() ?: 0
+                val plants by gardenViewModel.plantsList.collectAsState()
+                val plantToEdit = plants.firstOrNull { it.id == plantId }
+
+                if (plantToEdit != null) {
+                    EditScreen(
+                        speciesName = plantToEdit.speciesName,
+                        defaultWaterDays = plantToEdit.waterIntervalDays,
+                        initialCustomName = plantToEdit.customName,
+                        isEditing = true,
+                        onBackClick = { navController.popBackStack() },
+                        onSaveClick = { customName, waterDays ->
+                            val updatedPlant = plantToEdit.copy(
+                                customName = customName,
+                                waterIntervalDays = waterDays,
+                                nextWateringDate = System.currentTimeMillis() + (waterDays * 24L * 60 * 60 * 1000)
+                            )
+                            gardenViewModel.updatePlant(updatedPlant)
+                            navController.popBackStack()
+                        }
+                    )
+                } else {
+                    Text("Plant not found")
+                }
+            }
+            composable(Screen.GardenDetails.route) { backStackEntry ->
+                val plantId = backStackEntry.arguments?.getString("plantId")?.toIntOrNull() ?: 0
+                val plants by gardenViewModel.plantsList.collectAsState()
+                val plant = plants.firstOrNull { it.id == plantId }
+
+                GardenPlantDetailsScreen(
+                    plant = plant,
+                    onBackClick = { navController.popBackStack() }
                 )
             }
         }

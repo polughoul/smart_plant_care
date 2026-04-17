@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -23,8 +24,15 @@ import com.example.smart_plant_care.ui.viewmodels.GardenViewModel
 
 
 @Composable
-fun PlantCard(name: String, status: String, onDeleteClick: () -> Unit){
+fun PlantCard(
+    name: String,
+    status: String,
+    onCardClick: () -> Unit,
+    onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit
+) {
     Card(
+        onClick = onCardClick,
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
@@ -54,6 +62,12 @@ fun PlantCard(name: String, status: String, onDeleteClick: () -> Unit){
             }
 
             Spacer(modifier = Modifier.weight(1f))
+            IconButton(onClick = onEditClick) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = "Edit"
+                )
+            }
             IconButton(onClick = onDeleteClick) {
                 Icon(
                     imageVector = Icons.Default.Delete,
@@ -67,7 +81,12 @@ fun PlantCard(name: String, status: String, onDeleteClick: () -> Unit){
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyGardenScreen(viewModel: GardenViewModel, onNavigateToSearch: () -> Unit) {
+fun MyGardenScreen(
+    viewModel: GardenViewModel,
+    onNavigateToSearch: () -> Unit,
+    onEditPlant: (Int) -> Unit,
+    onOpenPlantDetails: (Int) -> Unit
+) {
 
     val plants by viewModel.plantsList.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
@@ -142,6 +161,8 @@ fun MyGardenScreen(viewModel: GardenViewModel, onNavigateToSearch: () -> Unit) {
                             PlantCard(
                                 name = plant.customName,
                                 status = calculateDaysRemaining(plant.nextWateringDate),
+                                onCardClick = { onOpenPlantDetails(plant.id) },
+                                onEditClick = { onEditPlant(plant.id) },
                                 onDeleteClick = { viewModel.deletePlant(plant.id) }
                             )
                         }

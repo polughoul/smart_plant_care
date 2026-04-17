@@ -19,6 +19,12 @@ class PlantRepository( private val plantDao: PlantDao) {
         }
     }
 
+    suspend fun updatePlant(plant: MyPlantEntity) {
+        withContext(Dispatchers.IO) {
+            plantDao.updatePlant(plant)
+        }
+    }
+
     suspend fun deletePlant(id: Int) {
         withContext(Dispatchers.IO) {
             plantDao.deletePlantById(id)
