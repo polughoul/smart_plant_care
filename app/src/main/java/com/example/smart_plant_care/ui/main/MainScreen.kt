@@ -31,12 +31,13 @@ import com.example.smart_plant_care.ui.screens.SettingsScreen
 import com.example.smart_plant_care.ui.viewmodels.GardenViewModel
 import com.example.smart_plant_care.ui.viewmodels.GardenViewModelFactory
 import com.example.smart_plant_care.ui.screens.DetailsScreen
+import com.example.smart_plant_care.ui.viewmodels.SettingsViewModel
 import kotlinx.coroutines.launch
 import java.net.URLDecoder.decode
 
 
 @Composable
-fun MainScreen(repository: PlantRepository) {
+fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -88,7 +89,9 @@ fun MainScreen(repository: PlantRepository) {
                 )
                 MyGardenScreen(viewModel = viewModel, onNavigateToSearch = { navController.navigate(Screen.Search.route) })
             }
-            composable(Screen.Settings.route) { SettingsScreen() }
+            composable(Screen.Settings.route) {
+                SettingsScreen(settingsViewModel = settingsViewModel)
+            }
             composable(Screen.Search.route) {
                 SearchScreen(
                     onBackClick = { navController.popBackStack() },
