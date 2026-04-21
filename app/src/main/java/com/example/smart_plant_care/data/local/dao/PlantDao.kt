@@ -14,8 +14,11 @@ interface PlantDao {
     @Query("SELECT * FROM my_plants")
     fun getAllPlants(): Flow<List<MyPlantEntity>>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertPlant(plant: MyPlantEntity)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    fun insertPlant(plant: MyPlantEntity): Long
+
+    @Query("SELECT COUNT(*) > 0 FROM my_plants WHERE remotePlantId = :remotePlantId")
+    fun existsByRemotePlantId(remotePlantId: Int): Boolean
 
     @Update
     fun updatePlant(plant: MyPlantEntity)

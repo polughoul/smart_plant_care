@@ -84,6 +84,7 @@ fun PlantCard(
 fun MyGardenScreen(
     viewModel: GardenViewModel,
     onNavigateToSearch: () -> Unit,
+    onDeletePlant: (Int) -> Unit,
     onEditPlant: (Int) -> Unit,
     onOpenPlantDetails: (Int) -> Unit
 ) {
@@ -163,7 +164,7 @@ fun MyGardenScreen(
                                 status = calculateDaysRemaining(plant.nextWateringDate),
                                 onCardClick = { onOpenPlantDetails(plant.id) },
                                 onEditClick = { onEditPlant(plant.id) },
-                                onDeleteClick = { viewModel.deletePlant(plant.id) }
+                                onDeleteClick = { onDeletePlant(plant.id) }
                             )
                         }
                     }

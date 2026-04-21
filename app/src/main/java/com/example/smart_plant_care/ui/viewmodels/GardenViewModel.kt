@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.smart_plant_care.data.local.entity.MyPlantEntity
+import com.example.smart_plant_care.data.repository.InsertPlantResult
 import com.example.smart_plant_care.data.repository.PlantRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -28,9 +29,10 @@ class GardenViewModel(private val repository: PlantRepository) : ViewModel() {
         }
     }
 
-    fun insertPlant(plant: MyPlantEntity) {
+    fun insertPlant(plant: MyPlantEntity, onResult: ((InsertPlantResult) -> Unit)? = null) {
         viewModelScope.launch {
-            repository.insertPlant(plant)
+            val result = repository.insertPlant(plant)
+            onResult?.invoke(result)
         }
     }
 

@@ -8,7 +8,7 @@ import com.example.smart_plant_care.data.local.dao.PlantDao
 import com.example.smart_plant_care.data.local.entity.MyPlantEntity
 
 
-@Database(entities = [MyPlantEntity::class], version = 2, exportSchema = false)
+@Database(entities = [MyPlantEntity::class], version = 3, exportSchema = false)
 abstract class AppDatabase: RoomDatabase() {
     abstract fun plantDao(): PlantDao
 

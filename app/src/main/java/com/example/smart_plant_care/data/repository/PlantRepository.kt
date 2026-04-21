@@ -6,6 +6,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 
+sealed interface InsertPlantResult {
+    data object Added : InsertPlantResult
+    data object Duplicate : InsertPlantResult
+}
+
 class PlantRepository( private val plantDao: PlantDao) {
 
 
@@ -13,9 +18,10 @@ class PlantRepository( private val plantDao: PlantDao) {
         return plantDao.getAllPlants()
     }
 
-    suspend fun insertPlant(plant: MyPlantEntity) {
-        withContext(Dispatchers.IO) {
-            plantDao.insertPlant(plant)
+    suspend fun insertPlant(plant: MyPlantEntity): InsertPlantResult {
+        return withContext(Dispatchers.IO) {
+            val insertId = plantDao.insertPlant(plant)
+            if (insertId == -1L) InsertPlantResult.Duplicate else InsertPlantResult.Added
         }
     }
 

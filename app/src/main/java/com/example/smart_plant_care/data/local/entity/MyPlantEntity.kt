@@ -1,15 +1,20 @@
 package com.example.smart_plant_care.data.local.entity
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 
-@Entity(tableName = "my_plants")
+@Entity(
+    tableName = "my_plants",
+    indices = [Index(value = ["remotePlantId"], unique = true)]
+)
 data class MyPlantEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     val customName: String,
     val speciesName: String,
+    val remotePlantId: Int? = null,
     val scientificName: String? = null,
     val family: String? = null,
     val origin: String? = null,

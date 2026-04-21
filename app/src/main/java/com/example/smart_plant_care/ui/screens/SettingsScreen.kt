@@ -1,5 +1,7 @@
 package com.example.smart_plant_care.ui.screens
 
+import android.Manifest
+import android.os.Build
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -20,15 +24,26 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import com.example.smart_plant_care.data.preferences.ThemeMode
+import com.example.smart_plant_care.notifications.PlantReminderScheduler
 import com.example.smart_plant_care.ui.viewmodels.SettingsViewModel
+import android.content.pm.PackageManager
 
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun SettingsScreen(settingsViewModel: SettingsViewModel) {
     val uiState by settingsViewModel.uiState.collectAsState()
+    val context = LocalContext.current
+
+    val notificationsPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        settingsViewModel.onNotificationsToggle(granted)
+    }
 
     Scaffold(
         topBar = {
@@ -93,9 +108,33 @@ fun SettingsScreen(settingsViewModel: SettingsViewModel) {
                     }
                     Switch(
                         checked = uiState.notificationsEnabled,
-                        onCheckedChange = settingsViewModel::onNotificationsToggle
+                        onCheckedChange = { enabled ->
+                            if (!enabled) {
+                                settingsViewModel.onNotificationsToggle(false)
+                            } else {
+                                val needsRuntimePermission = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                                val hasPermission = ContextCompat.checkSelfPermission(
+                                    context,
+                                    Manifest.permission.POST_NOTIFICATIONS
+                                ) == PackageManager.PERMISSION_GRANTED
+
+                                if (needsRuntimePermission && !hasPermission) {
+                                    notificationsPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                } else {
+                                    settingsViewModel.onNotificationsToggle(true)
+                                }
+                            }
+                        }
                     )
                 }
+            }
+
+            if (uiState.notificationsEnabled && !PlantReminderScheduler.hasNotificationPermission(context)) {
+                Text(
+                    text = "Notifications are enabled, but permission is denied in system settings.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error
+                )
             }
         }
     }
