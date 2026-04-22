@@ -21,6 +21,7 @@ data class MyPlantEntity(
     val plantType: String? = null,
     val sunlight: String? = null,
     val attracts: String? = null,
+    val description: String? = null,
     val waterIntervalDays: Int,
     val nextWateringDate: Long,
     val fruitingSeason: String? = null,

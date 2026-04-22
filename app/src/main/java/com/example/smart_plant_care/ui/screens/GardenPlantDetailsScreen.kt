@@ -139,6 +139,21 @@ fun GardenPlantDetailsScreen(
                 }
             }
 
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = stringResource(R.string.details_description),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = plant.description?.takeIf { it.isNotBlank() }
+                            ?: stringResource(R.string.details_no_description),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+
             if (onTestReminderIn5Seconds != null) {
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(16.dp)) {

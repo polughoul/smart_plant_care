@@ -2,17 +2,20 @@ package com.example.smart_plant_care.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
@@ -21,10 +24,12 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -46,7 +51,15 @@ fun EditScreen(
     val isManual = speciesName == MANUAL_ENTRY_SPECIES_TOKEN
     val defaultManualName = stringResource(R.string.edit_default_manual_name)
     var customName by remember(initialCustomName) { mutableStateOf(initialCustomName) }
-    var waterDays by remember(defaultWaterDays) { mutableFloatStateOf(defaultWaterDays.toFloat()) }
+    var savedWaterDays by remember(defaultWaterDays) {
+        mutableIntStateOf(defaultWaterDays.coerceIn(1, 30))
+    }
+    var draftWaterDays by remember(defaultWaterDays) {
+        mutableFloatStateOf(defaultWaterDays.coerceIn(1, 30).toFloat())
+    }
+    var isWaterEditorExpanded by remember(defaultWaterDays, isManual, isEditing) {
+        mutableStateOf(isManual && !isEditing)
+    }
 
     Scaffold(
         topBar = {
@@ -79,7 +92,12 @@ fun EditScreen(
                         isManual -> defaultManualName
                         else -> speciesName
                     }
-                    onSaveClick(finalName, waterDays.roundToInt())
+                    val finalWaterDays = if (isWaterEditorExpanded) {
+                        draftWaterDays.roundToInt().coerceIn(1, 30)
+                    } else {
+                        savedWaterDays
+                    }
+                    onSaveClick(finalName, finalWaterDays)
                 },
                 icon = { Icon(Icons.Default.Check, contentDescription = stringResource(R.string.edit_cd_save)) },
                 text = {
@@ -124,21 +142,57 @@ fun EditScreen(
             )
 
             Column {
-                val wateringDays = waterDays.roundToInt()
-                Text(
-                    text = pluralStringResource(
-                        R.plurals.edit_water_every_days,
-                        wateringDays,
-                        wateringDays
-                    ),
-                    style = MaterialTheme.typography.bodyLarge
-                )
-                Slider(
-                    value = waterDays,
-                    onValueChange = { waterDays = it },
-                    valueRange = 1f..30f,
-                    steps = 28
-                )
+                if (isWaterEditorExpanded) {
+                    val previewDays = draftWaterDays.roundToInt().coerceIn(1, 30)
+                    Text(
+                        text = pluralStringResource(
+                            R.plurals.edit_water_every_days,
+                            previewDays,
+                            previewDays
+                        ),
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    Slider(
+                        value = draftWaterDays,
+                        onValueChange = { draftWaterDays = it },
+                        valueRange = 1f..30f,
+                        steps = 28
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Button(
+                            onClick = {
+                                savedWaterDays = previewDays
+                                draftWaterDays = previewDays.toFloat()
+                                isWaterEditorExpanded = false
+                            }
+                        ) {
+                            Text(stringResource(R.string.edit_save_interval))
+                        }
+                    }
+                } else {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = pluralStringResource(
+                                R.plurals.edit_water_every_days,
+                                savedWaterDays,
+                                savedWaterDays
+                            ),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        OutlinedButton(
+                            onClick = {
+                                draftWaterDays = savedWaterDays.toFloat()
+                                isWaterEditorExpanded = true
+                            }
+                        ) {
+                            Text(stringResource(R.string.edit_change_interval))
+                        }
+                    }
+                }
             }
         }
     }

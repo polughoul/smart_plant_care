@@ -162,13 +162,6 @@ fun ApiPlantCard(plant: ApiPlantDto, onClick: () -> Unit) {
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
-                if (wateringText == null && sunlightText == null) {
-                    Text(
-                        text = stringResource(R.string.search_no_care_data),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
             }
         }
     }

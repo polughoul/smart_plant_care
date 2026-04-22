@@ -1,17 +1,22 @@
 package com.example.smart_plant_care.ui.screens
 
 import android.content.Context
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -20,6 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.filled.Delete
@@ -30,17 +36,29 @@ import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PlantCard(
     name: String,
     status: String,
+    isSelectionMode: Boolean,
+    isSelected: Boolean,
     onCardClick: () -> Unit,
+    onToggleSelection: () -> Unit,
+    onLongPress: () -> Unit,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
     Card(
-        onClick = onCardClick,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .combinedClickable(
+                onClick = {
+                    if (isSelectionMode) onToggleSelection() else onCardClick()
+                },
+                onLongClick = onLongPress
+            ),
+        border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
@@ -69,18 +87,25 @@ fun PlantCard(
             }
 
             Spacer(modifier = Modifier.weight(1f))
-            IconButton(onClick = onEditClick) {
-                Icon(
-                    imageVector = Icons.Default.Edit,
-                    contentDescription = stringResource(R.string.my_garden_cd_edit)
+            if (isSelectionMode) {
+                Checkbox(
+                    checked = isSelected,
+                    onCheckedChange = null
                 )
-            }
-            IconButton(onClick = onDeleteClick) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = stringResource(R.string.my_garden_cd_delete),
-                    tint = MaterialTheme.colorScheme.error
-                )
+            } else {
+                IconButton(onClick = onEditClick) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = stringResource(R.string.my_garden_cd_edit)
+                    )
+                }
+                IconButton(onClick = onDeleteClick) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = stringResource(R.string.my_garden_cd_delete),
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
             }
         }
     }
@@ -99,6 +124,15 @@ fun MyGardenScreen(
     val plants by viewModel.plantsList.collectAsState()
     val context = LocalContext.current
     var searchQuery by remember { mutableStateOf("") }
+    var selectedPlantIds by remember { mutableStateOf(setOf<Int>()) }
+    var pendingDeleteIds by remember { mutableStateOf(setOf<Int>()) }
+    val isSelectionMode = selectedPlantIds.isNotEmpty()
+
+    LaunchedEffect(plants) {
+        val existingIds = plants.map { it.id }.toSet()
+        selectedPlantIds = selectedPlantIds.intersect(existingIds)
+        pendingDeleteIds = pendingDeleteIds.intersect(existingIds)
+    }
 
     val filteredPlants = remember(plants, searchQuery) {
         if (searchQuery.isBlank()) {
@@ -115,7 +149,34 @@ fun MyGardenScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.my_garden_title)) },
+                title = {
+                    if (isSelectionMode) {
+                        Text(stringResource(R.string.my_garden_selected_count, selectedPlantIds.size))
+                    } else {
+                        Text(stringResource(R.string.my_garden_title))
+                    }
+                },
+                actions = {
+                    if (isSelectionMode) {
+                        IconButton(
+                            onClick = { pendingDeleteIds = selectedPlantIds },
+                            enabled = selectedPlantIds.isNotEmpty()
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = stringResource(R.string.my_garden_cd_delete_selected)
+                            )
+                        }
+                        IconButton(
+                            onClick = { selectedPlantIds = emptySet() }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = stringResource(R.string.my_garden_cd_clear_selection)
+                            )
+                        }
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -123,8 +184,10 @@ fun MyGardenScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onNavigateToSearch) {
-                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.my_garden_fab_cd))
+            if (!isSelectionMode) {
+                FloatingActionButton(onClick = onNavigateToSearch) {
+                    Icon(Icons.Default.Add, contentDescription = stringResource(R.string.my_garden_fab_cd))
+                }
             }
         }
     ) { paddingValues ->
@@ -170,14 +233,64 @@ fun MyGardenScreen(
                             PlantCard(
                                 name = plant.customName,
                                 status = calculateDaysRemaining(context, plant.nextWateringDate),
+                                isSelectionMode = isSelectionMode,
+                                isSelected = selectedPlantIds.contains(plant.id),
                                 onCardClick = { onOpenPlantDetails(plant.id) },
+                                onToggleSelection = {
+                                    selectedPlantIds = if (selectedPlantIds.contains(plant.id)) {
+                                        selectedPlantIds - plant.id
+                                    } else {
+                                        selectedPlantIds + plant.id
+                                    }
+                                },
+                                onLongPress = {
+                                    selectedPlantIds = selectedPlantIds + plant.id
+                                },
                                 onEditClick = { onEditPlant(plant.id) },
-                                onDeleteClick = { onDeletePlant(plant.id) }
+                                onDeleteClick = { pendingDeleteIds = setOf(plant.id) }
                             )
                         }
                     }
                 }
             }
+        }
+
+        if (pendingDeleteIds.isNotEmpty()) {
+            val selectedNames = plants.filter { pendingDeleteIds.contains(it.id) }.map { it.customName }
+            val message = if (pendingDeleteIds.size == 1) {
+                stringResource(
+                    R.string.delete_dialog_message_single,
+                    selectedNames.firstOrNull().orEmpty()
+                )
+            } else {
+                pluralStringResource(
+                    R.plurals.delete_dialog_message_multiple,
+                    pendingDeleteIds.size,
+                    pendingDeleteIds.size
+                )
+            }
+
+            AlertDialog(
+                onDismissRequest = { pendingDeleteIds = emptySet() },
+                title = { Text(stringResource(R.string.delete_dialog_title)) },
+                text = { Text(message) },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            pendingDeleteIds.forEach { onDeletePlant(it) }
+                            selectedPlantIds = selectedPlantIds - pendingDeleteIds
+                            pendingDeleteIds = emptySet()
+                        }
+                    ) {
+                        Text(stringResource(R.string.delete_dialog_confirm))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { pendingDeleteIds = emptySet() }) {
+                        Text(stringResource(R.string.delete_dialog_cancel))
+                    }
+                }
+            )
         }
     }
 }
