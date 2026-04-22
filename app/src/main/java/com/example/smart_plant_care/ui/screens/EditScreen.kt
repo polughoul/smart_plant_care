@@ -84,32 +84,29 @@ fun EditScreen(
             )
         },
         floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = {
-                    val finalName = when {
-                        customName.isNotBlank() -> customName
-                        isEditing && initialCustomName.isNotBlank() -> initialCustomName
-                        isManual -> defaultManualName
-                        else -> speciesName
-                    }
-                    val finalWaterDays = if (isWaterEditorExpanded) {
-                        draftWaterDays.roundToInt().coerceIn(1, 30)
-                    } else {
-                        savedWaterDays
-                    }
-                    onSaveClick(finalName, finalWaterDays)
-                },
-                icon = { Icon(Icons.Default.Check, contentDescription = stringResource(R.string.edit_cd_save)) },
-                text = {
-                    Text(
-                        if (isEditing) {
-                            stringResource(R.string.edit_save_changes)
-                        } else {
-                            stringResource(R.string.edit_save_to_garden)
+            if (!isWaterEditorExpanded) {
+                ExtendedFloatingActionButton(
+                    onClick = {
+                        val finalName = when {
+                            customName.isNotBlank() -> customName
+                            isEditing && initialCustomName.isNotBlank() -> initialCustomName
+                            isManual -> defaultManualName
+                            else -> speciesName
                         }
-                    )
-                }
-            )
+                        onSaveClick(finalName, savedWaterDays)
+                    },
+                    icon = { Icon(Icons.Default.Check, contentDescription = stringResource(R.string.edit_cd_save)) },
+                    text = {
+                        Text(
+                            if (isEditing) {
+                                stringResource(R.string.edit_save_changes)
+                            } else {
+                                stringResource(R.string.edit_save_to_garden)
+                            }
+                        )
+                    }
+                )
+            }
         }
     ) { paddingValues ->
         Column(

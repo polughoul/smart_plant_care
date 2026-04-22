@@ -1,6 +1,14 @@
 package com.example.smart_plant_care.ui.screens
 
 import android.content.Context
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -11,7 +19,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
@@ -39,6 +46,7 @@ import java.time.temporal.ChronoUnit
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PlantCard(
+    modifier: Modifier = Modifier,
     name: String,
     status: String,
     isSelectionMode: Boolean,
@@ -49,8 +57,27 @@ fun PlantCard(
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
+    val containerColor by animateColorAsState(
+        targetValue = if (isSelected) {
+            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.65f)
+        } else {
+            MaterialTheme.colorScheme.surface
+        },
+        animationSpec = tween(durationMillis = 180),
+        label = "plantCardContainerColor"
+    )
+    val borderColor by animateColorAsState(
+        targetValue = if (isSelected) {
+            MaterialTheme.colorScheme.primary
+        } else {
+            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)
+        },
+        animationSpec = tween(durationMillis = 180),
+        label = "plantCardBorderColor"
+    )
+
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .combinedClickable(
                 onClick = {
@@ -58,7 +85,8 @@ fun PlantCard(
                 },
                 onLongClick = onLongPress
             ),
-        border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
+        colors = CardDefaults.cardColors(containerColor = containerColor),
+        border = BorderStroke(if (isSelected) 2.dp else 1.dp, borderColor),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
@@ -150,30 +178,14 @@ fun MyGardenScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    if (isSelectionMode) {
-                        Text(stringResource(R.string.my_garden_selected_count, selectedPlantIds.size))
-                    } else {
-                        Text(stringResource(R.string.my_garden_title))
-                    }
-                },
-                actions = {
-                    if (isSelectionMode) {
-                        IconButton(
-                            onClick = { pendingDeleteIds = selectedPlantIds },
-                            enabled = selectedPlantIds.isNotEmpty()
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = stringResource(R.string.my_garden_cd_delete_selected)
-                            )
-                        }
-                        IconButton(
-                            onClick = { selectedPlantIds = emptySet() }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = stringResource(R.string.my_garden_cd_clear_selection)
-                            )
+                    AnimatedContent(
+                        targetState = selectedPlantIds.size to isSelectionMode,
+                        label = "myGardenTopBarTitle"
+                    ) { (count, selectionMode) ->
+                        if (selectionMode) {
+                            Text(stringResource(R.string.my_garden_selected_count, count))
+                        } else {
+                            Text(stringResource(R.string.my_garden_title))
                         }
                     }
                 },
@@ -216,6 +228,47 @@ fun MyGardenScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
+                AnimatedVisibility(
+                    visible = isSelectionMode,
+                    enter = expandVertically() + fadeIn(),
+                    exit = shrinkVertically() + fadeOut()
+                ) {
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = MaterialTheme.shapes.medium,
+                        color = MaterialTheme.colorScheme.secondaryContainer
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = stringResource(R.string.my_garden_selected_count, selectedPlantIds.size),
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSecondaryContainer
+                            )
+                            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                TextButton(
+                                    onClick = { pendingDeleteIds = selectedPlantIds },
+                                    enabled = selectedPlantIds.isNotEmpty()
+                                ) {
+                                    Text(stringResource(R.string.delete_dialog_confirm))
+                                }
+                                TextButton(onClick = { selectedPlantIds = emptySet() }) {
+                                    Text(stringResource(R.string.my_garden_cd_clear_selection))
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (isSelectionMode) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
                 if (filteredPlants.isEmpty()) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -231,6 +284,7 @@ fun MyGardenScreen(
                     ) {
                         items(filteredPlants) { plant ->
                             PlantCard(
+                                modifier = Modifier.animateItem(),
                                 name = plant.customName,
                                 status = calculateDaysRemaining(context, plant.nextWateringDate),
                                 isSelectionMode = isSelectionMode,
