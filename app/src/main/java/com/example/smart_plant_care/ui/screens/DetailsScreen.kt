@@ -17,10 +17,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.example.smart_plant_care.R
 import com.example.smart_plant_care.data.remote.dto.PlantDetailsDto
 import com.example.smart_plant_care.data.remote.dto.WateringBenchmark
 import com.example.smart_plant_care.ui.viewmodels.DetailsUiState
@@ -44,8 +46,8 @@ fun DetailsScreen(
 
     val topBarTitle = when (val state = uiState) {
         is DetailsUiState.Success -> state.plant.commonName
-        DetailsUiState.Loading -> "Loading..."
-        else -> "Plant Details"
+        DetailsUiState.Loading -> stringResource(R.string.details_title_loading)
+        else -> stringResource(R.string.details_title_default)
     }
 
     Scaffold(
@@ -53,7 +55,9 @@ fun DetailsScreen(
             TopAppBar(
                 title = { Text(topBarTitle) },
                 navigationIcon = {
-                    IconButton(onClick = onBackClick) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back") }
+                    IconButton(onClick = onBackClick) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.common_cd_back))
+                    }
                 }
             )
         },
@@ -65,8 +69,8 @@ fun DetailsScreen(
                         val days = benchmarkToDefaultDays(state.plant.wateringBenchmark)
                         onAddClick(state.plant, days)
                     },
-                    icon = { Icon(Icons.Default.Add, "Add") },
-                    text = { Text("Add to garden") }
+                    icon = { Icon(Icons.Default.Add, stringResource(R.string.common_cd_add)) },
+                    text = { Text(stringResource(R.string.details_add_to_garden)) }
                 )
             }
         }
@@ -99,7 +103,7 @@ fun DetailsScreen(
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     OutlinedButton(onClick = detailsViewModel::retry) {
-                        Text("Retry")
+                        Text(stringResource(R.string.details_retry))
                     }
                 }
             }
@@ -107,6 +111,8 @@ fun DetailsScreen(
             is DetailsUiState.Success -> {
                 val plant = state.plant
                 var isDescriptionExpanded by remember(plant.id) { mutableStateOf(false) }
+                val yesLabel = stringResource(R.string.common_yes)
+                val noLabel = stringResource(R.string.common_no)
                 Column(
                     modifier = Modifier
                         .padding(paddingValues)
@@ -130,16 +136,36 @@ fun DetailsScreen(
                         )
 
                         val quickFacts = buildList {
-                            plant.family?.takeIf { it.isNotBlank() }?.let { add("Family: $it") }
-                            plant.type?.takeIf { it.isNotBlank() }?.let { add("Type: $it") }
-                            plant.origin?.takeIf { it.isNotEmpty() }?.joinToString()?.let { add("Origin: $it") }
-                            plant.attracts?.takeIf { it.isNotEmpty() }?.joinToString()?.let { add("Attracts: $it") }
-                            plant.fruitingSeason?.takeIf { it.isNotBlank() }?.let { add("Fruiting season: $it") }
-                            plant.harvestSeason?.takeIf { it.isNotBlank() }?.let { add("Harvest season: $it") }
-                            plant.harvestMethod?.takeIf { it.isNotBlank() }?.let { add("Harvest method: $it") }
-                            plant.medicinal?.let { add("Medicinal: ${if (it) "Yes" else "No"}") }
-                            plant.poisonousToHumans?.let { add("Poisonous to humans: ${if (it) "Yes" else "No"}") }
-                            plant.poisonousToPets?.let { add("Poisonous to pets: ${if (it) "Yes" else "No"}") }
+                            plant.family?.takeIf { it.isNotBlank() }?.let {
+                                add(stringResource(R.string.fact_family_format, it))
+                            }
+                            plant.type?.takeIf { it.isNotBlank() }?.let {
+                                add(stringResource(R.string.fact_type_format, it))
+                            }
+                            plant.origin?.takeIf { it.isNotEmpty() }?.joinToString()?.let {
+                                add(stringResource(R.string.fact_origin_format, it))
+                            }
+                            plant.attracts?.takeIf { it.isNotEmpty() }?.joinToString()?.let {
+                                add(stringResource(R.string.fact_attracts_format, it))
+                            }
+                            plant.fruitingSeason?.takeIf { it.isNotBlank() }?.let {
+                                add(stringResource(R.string.fact_fruiting_season_format, it))
+                            }
+                            plant.harvestSeason?.takeIf { it.isNotBlank() }?.let {
+                                add(stringResource(R.string.fact_harvest_season_format, it))
+                            }
+                            plant.harvestMethod?.takeIf { it.isNotBlank() }?.let {
+                                add(stringResource(R.string.fact_harvest_method_format, it))
+                            }
+                            plant.medicinal?.let {
+                                add(stringResource(R.string.fact_medicinal_format, if (it) yesLabel else noLabel))
+                            }
+                            plant.poisonousToHumans?.let {
+                                add(stringResource(R.string.fact_poisonous_humans_format, if (it) yesLabel else noLabel))
+                            }
+                            plant.poisonousToPets?.let {
+                                add(stringResource(R.string.fact_poisonous_pets_format, if (it) yesLabel else noLabel))
+                            }
                         }
 
                         Spacer(modifier = Modifier.height(16.dp))
@@ -152,7 +178,7 @@ fun DetailsScreen(
                                     ?.takeIf { it.isNotBlank() }
                                 val sunlightText = plant.sunlight?.joinToString()?.takeIf { it.isNotBlank() }
                                     ?: guideSunlight
-                                    ?: "Unknown"
+                                    ?: stringResource(R.string.details_unknown)
 
                                 val benchmarkText = plant.wateringBenchmark?.value?.takeIf { it.isNotBlank() }
                                 val benchmarkLabel = formatBenchmarkLabel(plant.wateringBenchmark)
@@ -161,14 +187,14 @@ fun DetailsScreen(
                                     ?.description
                                     ?.takeIf { it.isNotBlank() }
                                 val wateringText = plant.watering?.takeIf { it.isNotBlank() }
-                                    ?: benchmarkText?.let { "Every $it days" }
+                                    ?: benchmarkText?.let { stringResource(R.string.details_every_days_format, it) }
                                     ?: guideWatering
-                                    ?: "Unknown"
+                                    ?: stringResource(R.string.details_unknown)
                                 val waterLine = benchmarkLabel?.let { "$wateringText ($it)" } ?: wateringText
 
-                                Text("Sunlight: $sunlightText")
+                                Text(stringResource(R.string.details_sunlight_line, sunlightText))
                                 Spacer(modifier = Modifier.height(8.dp))
-                                Text("Water: $waterLine")
+                                Text(stringResource(R.string.details_water_line, waterLine))
                             }
                         }
 
@@ -177,7 +203,10 @@ fun DetailsScreen(
 
                             Card(modifier = Modifier.fillMaxWidth()) {
                                 Column(modifier = Modifier.padding(16.dp)) {
-                                    Text(text = "Quick facts", style = MaterialTheme.typography.titleMedium)
+                                    Text(
+                                        text = stringResource(R.string.details_quick_facts),
+                                        style = MaterialTheme.typography.titleMedium
+                                    )
                                     Spacer(modifier = Modifier.height(8.dp))
 
                                     quickFacts.forEachIndexed { index, fact ->
@@ -194,7 +223,10 @@ fun DetailsScreen(
 
                         Card(modifier = Modifier.fillMaxWidth()) {
                             Column(modifier = Modifier.padding(16.dp)) {
-                                Text(text = "Description", style = MaterialTheme.typography.titleMedium)
+                                Text(
+                                    text = stringResource(R.string.details_description),
+                                    style = MaterialTheme.typography.titleMedium
+                                )
                                 Spacer(modifier = Modifier.height(8.dp))
 
                                 val descriptionText = plant.description?.takeIf { it.isNotBlank() }
@@ -207,11 +239,17 @@ fun DetailsScreen(
                                         overflow = TextOverflow.Ellipsis
                                     )
                                     TextButton(onClick = { isDescriptionExpanded = !isDescriptionExpanded }) {
-                                        Text(if (isDescriptionExpanded) "Show less" else "Show more")
+                                        Text(
+                                            if (isDescriptionExpanded) {
+                                                stringResource(R.string.details_show_less)
+                                            } else {
+                                                stringResource(R.string.details_show_more)
+                                            }
+                                        )
                                     }
                                 } else {
                                     Text(
-                                        text = "No description available",
+                                        text = stringResource(R.string.details_no_description),
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )

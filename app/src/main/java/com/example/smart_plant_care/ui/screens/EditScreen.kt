@@ -1,14 +1,37 @@
 package com.example.smart_plant_care.ui.screens
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.smart_plant_care.R
 import kotlin.math.roundToInt
+
+const val MANUAL_ENTRY_SPECIES_TOKEN = "__manual_entry__"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -20,9 +43,10 @@ fun EditScreen(
     onSaveClick: (String, Int) -> Unit,
     onBackClick: () -> Unit
 ) {
-    val isManual = speciesName == "Manual Entry"
+    val isManual = speciesName == MANUAL_ENTRY_SPECIES_TOKEN
+    val defaultManualName = stringResource(R.string.edit_default_manual_name)
     var customName by remember(initialCustomName) { mutableStateOf(initialCustomName) }
-    var waterDays by remember(defaultWaterDays) { mutableStateOf(defaultWaterDays.toFloat()) }
+    var waterDays by remember(defaultWaterDays) { mutableFloatStateOf(defaultWaterDays.toFloat()) }
 
     Scaffold(
         topBar = {
@@ -30,14 +54,19 @@ fun EditScreen(
                 title = {
                     Text(
                         when {
-                            isEditing -> "Edit Plant"
-                            isManual -> "Create New Plant"
-                            else -> "Plant Settings"
+                            isEditing -> stringResource(R.string.edit_title_edit)
+                            isManual -> stringResource(R.string.edit_title_create)
+                            else -> stringResource(R.string.edit_title_settings)
                         }
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBackClick) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back") }
+                    IconButton(onClick = onBackClick) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.edit_cd_back)
+                        )
+                    }
                 }
             )
         },
@@ -47,13 +76,21 @@ fun EditScreen(
                     val finalName = when {
                         customName.isNotBlank() -> customName
                         isEditing && initialCustomName.isNotBlank() -> initialCustomName
-                        isManual -> "My Plant"
+                        isManual -> defaultManualName
                         else -> speciesName
                     }
                     onSaveClick(finalName, waterDays.roundToInt())
                 },
-                icon = { Icon(Icons.Default.Check, "Save") },
-                text = { Text(if (isEditing) "Save changes" else "Save to Garden") }
+                icon = { Icon(Icons.Default.Check, contentDescription = stringResource(R.string.edit_cd_save)) },
+                text = {
+                    Text(
+                        if (isEditing) {
+                            stringResource(R.string.edit_save_changes)
+                        } else {
+                            stringResource(R.string.edit_save_to_garden)
+                        }
+                    )
+                }
             )
         }
     ) { paddingValues ->
@@ -63,7 +100,7 @@ fun EditScreen(
         ) {
             if (!isManual) {
                 Text(
-                    text = "Selected: $speciesName",
+                    text = stringResource(R.string.edit_selected_format, speciesName),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -75,20 +112,25 @@ fun EditScreen(
                 label = {
                     Text(
                         when {
-                            isEditing -> "Plant Name"
-                            isManual -> "Plant Name (Required)"
-                            else -> "Custom Name (Optional)"
+                            isEditing -> stringResource(R.string.edit_label_plant_name)
+                            isManual -> stringResource(R.string.edit_label_plant_name_required)
+                            else -> stringResource(R.string.edit_label_custom_name_optional)
                         }
                     )
                 },
-                placeholder = { Text("e.g. My Kitchen Ficus") },
+                placeholder = { Text(stringResource(R.string.edit_placeholder_name)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
 
             Column {
+                val wateringDays = waterDays.roundToInt()
                 Text(
-                    text = "Water every ${waterDays.roundToInt()} days",
+                    text = pluralStringResource(
+                        R.plurals.edit_water_every_days,
+                        wateringDays,
+                        wateringDays
+                    ),
                     style = MaterialTheme.typography.bodyLarge
                 )
                 Slider(

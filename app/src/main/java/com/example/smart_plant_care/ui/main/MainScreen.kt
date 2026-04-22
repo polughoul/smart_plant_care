@@ -20,6 +20,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -34,6 +35,7 @@ import com.example.smart_plant_care.notifications.PlantReminderScheduler
 import com.example.smart_plant_care.ui.navigation.Screen
 import com.example.smart_plant_care.ui.screens.EditScreen
 import com.example.smart_plant_care.ui.screens.GardenPlantDetailsScreen
+import com.example.smart_plant_care.ui.screens.MANUAL_ENTRY_SPECIES_TOKEN
 import com.example.smart_plant_care.ui.screens.MyGardenScreen
 import com.example.smart_plant_care.ui.screens.SearchScreen
 import com.example.smart_plant_care.ui.screens.SettingsScreen
@@ -76,8 +78,13 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
             if (currentRoute == Screen.MyGarden.route || currentRoute == Screen.Settings.route) {
                 NavigationBar {
                     NavigationBarItem(
-                        icon = { Icon(Icons.Default.Home, contentDescription = "Garden") },
-                        label = { Text("My Garden") },
+                        icon = {
+                            Icon(
+                                Icons.Default.Home,
+                                contentDescription = stringResource(R.string.nav_cd_garden)
+                            )
+                        },
+                        label = { Text(stringResource(R.string.nav_my_garden)) },
                         selected = currentRoute == Screen.MyGarden.route,
                         onClick = {
                             navController.navigate(Screen.MyGarden.route) {
@@ -88,8 +95,13 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
                         }
                     )
                     NavigationBarItem(
-                        icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
-                        label = { Text("Settings") },
+                        icon = {
+                            Icon(
+                                Icons.Default.Settings,
+                                contentDescription = stringResource(R.string.nav_cd_settings)
+                            )
+                        },
+                        label = { Text(stringResource(R.string.nav_settings)) },
                         selected = currentRoute == Screen.Settings.route,
                         onClick = {
                             navController.navigate(Screen.Settings.route) {
@@ -134,7 +146,7 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
                     onPlantClick = { plantId ->
                         if (plantId == -1) {
                             sharedPlantDetails = null
-                            navController.navigate(Screen.Edit.createRoute("Manual Entry", 7))
+                            navController.navigate(Screen.Edit.createRoute(MANUAL_ENTRY_SPECIES_TOKEN, 7))
                         } else {
                             navController.navigate(Screen.Details.createRoute(plantId))
                         }
@@ -172,15 +184,17 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
                                 InsertPlantResult.Added -> {
                                     navController.popBackStack(Screen.MyGarden.route, inclusive = false)
                                     scope.launch {
-                                        snackbarHostState.showSnackbar("Plant added to My Garden")
+                                        snackbarHostState.showSnackbar(
+                                            context.getString(R.string.main_snackbar_added_to_garden)
+                                        )
                                     }
                                 }
 
                                 InsertPlantResult.Duplicate -> {
                                     scope.launch {
                                         val snackbarResult = snackbarHostState.showSnackbar(
-                                            message = "This plant is already in your garden",
-                                            actionLabel = "Open Garden"
+                                            message = context.getString(R.string.main_snackbar_duplicate),
+                                            actionLabel = context.getString(R.string.main_snackbar_action_open_garden)
                                         )
                                         if (snackbarResult == SnackbarResult.ActionPerformed) {
                                             val popped = navController.popBackStack(
@@ -201,7 +215,8 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
                 )
             }
             composable(Screen.Edit.route) { backStackEntry ->
-                val rawName = backStackEntry.arguments?.getString("speciesName") ?: "Plant"
+                val rawName = backStackEntry.arguments?.getString("speciesName")
+                    ?: context.getString(R.string.main_fallback_plant_name)
                 val speciesName = decode(rawName, "UTF-8")
                 val defaultWaterDays = backStackEntry.arguments?.getString("defaultWater")?.toIntOrNull() ?: 7
 
@@ -259,7 +274,7 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
                         }
                     )
                 } else {
-                    Text("Plant not found")
+                    Text(stringResource(R.string.garden_details_not_found))
                 }
             }
             composable(Screen.GardenDetails.route) { backStackEntry ->

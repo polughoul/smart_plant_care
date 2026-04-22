@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -44,7 +45,7 @@ fun GardenPlantDetailsScreen(
                 title = { Text(plant?.customName ?: stringResource(R.string.garden_details_default_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_cd_back))
                     }
                 }
             )
@@ -62,21 +63,36 @@ fun GardenPlantDetailsScreen(
             return@Scaffold
         }
 
+        val yesLabel = stringResource(R.string.common_yes)
+        val noLabel = stringResource(R.string.common_no)
+        val wateringIntervalFact = pluralStringResource(
+            R.plurals.fact_water_every_days,
+            plant.waterIntervalDays,
+            plant.waterIntervalDays
+        )
         val facts = buildList {
-            add("Species: ${plant.speciesName}")
-            plant.scientificName?.takeIf { it.isNotBlank() }?.let { add("Scientific name: $it") }
-            plant.family?.takeIf { it.isNotBlank() }?.let { add("Family: $it") }
-            plant.plantType?.takeIf { it.isNotBlank() }?.let { add("Type: $it") }
-            plant.origin?.takeIf { it.isNotBlank() }?.let { add("Origin: $it") }
-            plant.sunlight?.takeIf { it.isNotBlank() }?.let { add("Sunlight: $it") }
-            plant.attracts?.takeIf { it.isNotBlank() }?.let { add("Attracts: $it") }
-            plant.fruitingSeason?.takeIf { it.isNotBlank() }?.let { add("Fruiting season: $it") }
-            plant.harvestSeason?.takeIf { it.isNotBlank() }?.let { add("Harvest season: $it") }
-            plant.harvestMethod?.takeIf { it.isNotBlank() }?.let { add("Harvest method: $it") }
-            add("Water every ${plant.waterIntervalDays} days")
-            add("Medicinal: ${if (plant.isMedicinal) "Yes" else "No"}")
-            add("Poisonous to humans: ${if (plant.isPoisonousToHumans) "Yes" else "No"}")
-            add("Poisonous to pets: ${if (plant.isPoisonousToPets) "Yes" else "No"}")
+            add(stringResource(R.string.fact_species_format, plant.speciesName))
+            plant.scientificName?.takeIf { it.isNotBlank() }?.let {
+                add(stringResource(R.string.fact_scientific_name_format, it))
+            }
+            plant.family?.takeIf { it.isNotBlank() }?.let { add(stringResource(R.string.fact_family_format, it)) }
+            plant.plantType?.takeIf { it.isNotBlank() }?.let { add(stringResource(R.string.fact_type_format, it)) }
+            plant.origin?.takeIf { it.isNotBlank() }?.let { add(stringResource(R.string.fact_origin_format, it)) }
+            plant.sunlight?.takeIf { it.isNotBlank() }?.let { add(stringResource(R.string.fact_sunlight_format, it)) }
+            plant.attracts?.takeIf { it.isNotBlank() }?.let { add(stringResource(R.string.fact_attracts_format, it)) }
+            plant.fruitingSeason?.takeIf { it.isNotBlank() }?.let {
+                add(stringResource(R.string.fact_fruiting_season_format, it))
+            }
+            plant.harvestSeason?.takeIf { it.isNotBlank() }?.let {
+                add(stringResource(R.string.fact_harvest_season_format, it))
+            }
+            plant.harvestMethod?.takeIf { it.isNotBlank() }?.let {
+                add(stringResource(R.string.fact_harvest_method_format, it))
+            }
+            add(wateringIntervalFact)
+            add(stringResource(R.string.fact_medicinal_format, if (plant.isMedicinal) yesLabel else noLabel))
+            add(stringResource(R.string.fact_poisonous_humans_format, if (plant.isPoisonousToHumans) yesLabel else noLabel))
+            add(stringResource(R.string.fact_poisonous_pets_format, if (plant.isPoisonousToPets) yesLabel else noLabel))
         }
 
         Column(

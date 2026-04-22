@@ -13,6 +13,59 @@
     <string name="notification_title_watering_reminder">Watering reminder</string>
     <string name="notification_text_time_to_water">Time to water %1$s</string>
     <string name="notification_action_mark_watered">Mark as watered</string>
+    <string name="common_yes">Yes</string>
+    <string name="common_no">No</string>
+    <string name="common_cd_back">Back</string>
+    <string name="common_cd_add">Add</string>
+
+    <string name="nav_my_garden">My Garden</string>
+    <string name="nav_settings">Settings</string>
+    <string name="nav_cd_garden">Garden</string>
+    <string name="nav_cd_settings">Settings</string>
+    <string name="main_snackbar_added_to_garden">Plant added to My Garden</string>
+    <string name="main_snackbar_duplicate">This plant is already in your garden</string>
+    <string name="main_snackbar_action_open_garden">Open Garden</string>
+    <string name="main_fallback_plant_name">Plant</string>
+
+    <string name="my_garden_title">My Garden</string>
+    <string name="my_garden_fab_cd">Find plant</string>
+    <string name="my_garden_empty">No plants yet</string>
+    <string name="my_garden_search_label">Search in my garden</string>
+    <string name="my_garden_search_placeholder">e.g. ficus</string>
+    <string name="my_garden_no_matches">No matching plants</string>
+    <string name="my_garden_cd_edit">Edit</string>
+    <string name="my_garden_cd_delete">Delete</string>
+
+    <string name="search_title">Find Plant</string>
+    <string name="search_cd_back">Back</string>
+    <string name="search_placeholder">Ficus</string>
+    <string name="search_cd_action">Search</string>
+    <string name="search_create_new">Create new plant</string>
+    <string name="search_idle_prompt">Enter a plant name to start search</string>
+    <string name="search_empty">No plants found for this query</string>
+    <string name="search_retry">Retry</string>
+    <string name="search_unknown">Unknown</string>
+    <string name="search_watering_format">Watering: %1$s</string>
+    <string name="search_sunlight_format">Sunlight: %1$s</string>
+    <string name="search_no_care_data">No watering/sunlight data in search response</string>
+
+    <string name="edit_title_edit">Edit Plant</string>
+    <string name="edit_title_create">Create New Plant</string>
+    <string name="edit_title_settings">Plant Settings</string>
+    <string name="edit_cd_back">Back</string>
+    <string name="edit_default_manual_name">My Plant</string>
+    <string name="edit_cd_save">Save</string>
+    <string name="edit_save_changes">Save changes</string>
+    <string name="edit_save_to_garden">Save to Garden</string>
+    <string name="edit_selected_format">Selected: %1$s</string>
+    <string name="edit_label_plant_name">Plant Name</string>
+    <string name="edit_label_plant_name_required">Plant Name (Required)</string>
+    <string name="edit_label_custom_name_optional">Custom Name (Optional)</string>
+    <string name="edit_placeholder_name">e.g. My Kitchen Ficus</string>
+    <plurals name="edit_water_every_days">
+        <item quantity="one">Water every %1$d day</item>
+        <item quantity="other">Water every %1$d days</item>
+    </plurals>
 
     <string name="garden_details_default_title">Plant details</string>
     <string name="garden_details_not_found">Plant not found</string>
@@ -23,9 +76,43 @@
     <string name="garden_details_snackbar_enable_reminders">Enable reminders in Settings first.</string>
     <string name="garden_details_snackbar_permission_missing">Notification permission is missing.</string>
     <string name="garden_details_snackbar_scheduled">Reminder for %1$s will appear in about 5 seconds.</string>
+    <string name="fact_species_format">Species: %1$s</string>
+    <string name="fact_scientific_name_format">Scientific name: %1$s</string>
+    <string name="fact_family_format">Family: %1$s</string>
+    <string name="fact_type_format">Type: %1$s</string>
+    <string name="fact_origin_format">Origin: %1$s</string>
+    <string name="fact_sunlight_format">Sunlight: %1$s</string>
+    <string name="fact_attracts_format">Attracts: %1$s</string>
+    <string name="fact_fruiting_season_format">Fruiting season: %1$s</string>
+    <string name="fact_harvest_season_format">Harvest season: %1$s</string>
+    <string name="fact_harvest_method_format">Harvest method: %1$s</string>
+    <string name="fact_medicinal_format">Medicinal: %1$s</string>
+    <string name="fact_poisonous_humans_format">Poisonous to humans: %1$s</string>
+    <string name="fact_poisonous_pets_format">Poisonous to pets: %1$s</string>
+
+    <string name="details_title_loading">Loading…</string>
+    <string name="details_title_default">Plant Details</string>
+    <string name="details_add_to_garden">Add to garden</string>
+    <string name="details_retry">Retry</string>
+    <string name="details_unknown">Unknown</string>
+    <string name="details_every_days_format">Every %1$s days</string>
+    <string name="details_sunlight_line">Sunlight: %1$s</string>
+    <string name="details_water_line">Water: %1$s</string>
+    <string name="details_quick_facts">Quick facts</string>
+    <string name="details_description">Description</string>
+    <string name="details_show_less">Show less</string>
+    <string name="details_show_more">Show more</string>
+    <string name="details_no_description">No description available</string>
 
     <string name="watering_status_due_now">Need to water immediately</string>
     <string name="watering_status_today">Water today</string>
     <string name="watering_status_tomorrow">Water tomorrow</string>
-    <string name="watering_status_after_days">Water after %1$d days</string>
+    <plurals name="fact_water_every_days">
+        <item quantity="one">Water every %1$d day</item>
+        <item quantity="other">Water every %1$d days</item>
+    </plurals>
+    <plurals name="watering_status_after_days">
+        <item quantity="one">Water after %1$d day</item>
+        <item quantity="other">Water after %1$d days</item>
+    </plurals>
 </resources>

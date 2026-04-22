@@ -1,6 +1,5 @@
 package com.example.smart_plant_care.ui.screens
 
-import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.compose.foundation.layout.Arrangement
@@ -34,6 +33,7 @@ import com.example.smart_plant_care.data.preferences.ThemeMode
 import com.example.smart_plant_care.notifications.PlantReminderScheduler
 import com.example.smart_plant_care.ui.viewmodels.SettingsViewModel
 
+private const val POST_NOTIFICATIONS_PERMISSION = "android.permission.POST_NOTIFICATIONS"
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -118,11 +118,11 @@ fun SettingsScreen(settingsViewModel: SettingsViewModel) {
                                 val needsRuntimePermission = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
                                 val hasPermission = ContextCompat.checkSelfPermission(
                                     context,
-                                    Manifest.permission.POST_NOTIFICATIONS
+                                    POST_NOTIFICATIONS_PERMISSION
                                 ) == PackageManager.PERMISSION_GRANTED
 
                                 if (needsRuntimePermission && !hasPermission) {
-                                    notificationsPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                    notificationsPermissionLauncher.launch(POST_NOTIFICATIONS_PERMISSION)
                                 } else {
                                     settingsViewModel.onNotificationsToggle(true)
                                 }

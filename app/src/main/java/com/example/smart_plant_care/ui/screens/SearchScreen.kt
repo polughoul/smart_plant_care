@@ -14,10 +14,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.example.smart_plant_care.R
 import com.example.smart_plant_care.data.remote.dto.ApiPlantDto
 import com.example.smart_plant_care.ui.viewmodels.SearchUiState
 import com.example.smart_plant_care.ui.viewmodels.SearchViewModel
@@ -35,10 +37,10 @@ fun SearchScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Find Plant") },
+                title = { Text(stringResource(R.string.search_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.search_cd_back))
                     }
                 }
             )
@@ -54,13 +56,13 @@ fun SearchScreen(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Ficus") },
+                placeholder = { Text(stringResource(R.string.search_placeholder)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                 keyboardActions = KeyboardActions(onSearch = { searchViewModel.searchPlants(searchQuery) }),
                 trailingIcon = {
                     IconButton(onClick = { searchViewModel.searchPlants(searchQuery) }) {
-                        Icon(Icons.Default.Search, contentDescription = "Search")
+                        Icon(Icons.Default.Search, contentDescription = stringResource(R.string.search_cd_action))
                     }
                 }
             )
@@ -74,7 +76,7 @@ fun SearchScreen(
             ) {
                 Icon(Icons.Default.Add, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
-                Text("Create new plant")
+                Text(stringResource(R.string.search_create_new))
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -82,7 +84,7 @@ fun SearchScreen(
             when (val state = uiState) {
                 SearchUiState.Idle -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("Enter a plant name to start search")
+                        Text(stringResource(R.string.search_idle_prompt))
                     }
                 }
 
@@ -102,7 +104,7 @@ fun SearchScreen(
 
                 SearchUiState.Empty -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("No plants found for this query")
+                        Text(stringResource(R.string.search_empty))
                     }
                 }
 
@@ -119,7 +121,7 @@ fun SearchScreen(
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         OutlinedButton(onClick = searchViewModel::retryLastSearch) {
-                            Text("Retry")
+                            Text(stringResource(R.string.search_retry))
                         }
                     }
                 }
@@ -131,7 +133,8 @@ fun SearchScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ApiPlantCard(plant: ApiPlantDto, onClick: () -> Unit) {
-    val scientificText = plant.scientificName?.firstOrNull()?.takeIf { it.isNotBlank() } ?: "Unknown"
+    val scientificText = plant.scientificName?.firstOrNull()?.takeIf { it.isNotBlank() }
+        ?: stringResource(R.string.search_unknown)
     val wateringText = plant.watering?.takeIf { it.isNotBlank() }
     val sunlightText = plant.sunlight?.joinToString()?.takeIf { it.isNotBlank() }
 
@@ -148,14 +151,20 @@ fun ApiPlantCard(plant: ApiPlantDto, onClick: () -> Unit) {
                 Text(text = plant.commonName, style = MaterialTheme.typography.titleMedium)
                 Text(text = scientificText, style = MaterialTheme.typography.bodySmall)
                 if (wateringText != null) {
-                    Text(text = "Watering: $wateringText", style = MaterialTheme.typography.bodySmall)
+                    Text(
+                        text = stringResource(R.string.search_watering_format, wateringText),
+                        style = MaterialTheme.typography.bodySmall
+                    )
                 }
                 if (sunlightText != null) {
-                    Text(text = "Sunlight: $sunlightText", style = MaterialTheme.typography.bodySmall)
+                    Text(
+                        text = stringResource(R.string.search_sunlight_format, sunlightText),
+                        style = MaterialTheme.typography.bodySmall
+                    )
                 }
                 if (wateringText == null && sunlightText == null) {
                     Text(
-                        text = "No watering/sunlight data in search response",
+                        text = stringResource(R.string.search_no_care_data),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

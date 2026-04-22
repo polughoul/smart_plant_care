@@ -20,6 +20,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.filled.Delete
 import com.example.smart_plant_care.R
@@ -71,13 +72,13 @@ fun PlantCard(
             IconButton(onClick = onEditClick) {
                 Icon(
                     imageVector = Icons.Default.Edit,
-                    contentDescription = "Edit"
+                    contentDescription = stringResource(R.string.my_garden_cd_edit)
                 )
             }
             IconButton(onClick = onDeleteClick) {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = "Delete",
+                    contentDescription = stringResource(R.string.my_garden_cd_delete),
                     tint = MaterialTheme.colorScheme.error
                 )
             }
@@ -114,7 +115,7 @@ fun MyGardenScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("My Garden")},
+                title = { Text(stringResource(R.string.my_garden_title)) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -123,14 +124,14 @@ fun MyGardenScreen(
         },
         floatingActionButton = {
             FloatingActionButton(onClick = onNavigateToSearch) {
-                Icon(Icons.Default.Add, contentDescription = "find plant")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.my_garden_fab_cd))
             }
         }
     ) { paddingValues ->
 
         if (plants.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("No plants yet")
+                Text(stringResource(R.string.my_garden_empty))
             }
         } else {
             Column(
@@ -145,8 +146,8 @@ fun MyGardenScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 16.dp),
-                    label = { Text("Search in my garden") },
-                    placeholder = { Text("e.g. ficus") },
+                    label = { Text(stringResource(R.string.my_garden_search_label)) },
+                    placeholder = { Text(stringResource(R.string.my_garden_search_placeholder)) },
                     singleLine = true
                 )
 
@@ -157,7 +158,7 @@ fun MyGardenScreen(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("No matching plants")
+                        Text(stringResource(R.string.my_garden_no_matches))
                     }
                 } else {
                     LazyColumn(
@@ -193,6 +194,10 @@ fun calculateDaysRemaining(context: Context, nextWateringMillis: Long): String {
     return when {
         daysUntil <= 0 -> context.getString(R.string.watering_status_today)
         daysUntil == 1 -> context.getString(R.string.watering_status_tomorrow)
-        else -> context.getString(R.string.watering_status_after_days, daysUntil)
+        else -> context.resources.getQuantityString(
+            R.plurals.watering_status_after_days,
+            daysUntil,
+            daysUntil
+        )
     }
 }
