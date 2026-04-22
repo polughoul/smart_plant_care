@@ -16,9 +16,12 @@ object PlantReminderScheduler {
 
     const val CHANNEL_ID = "watering_reminders"
     const val CHANNEL_NAME = "Watering reminders"
+    const val ACTION_REMINDER_TRIGGER = "com.example.smart_plant_care.action.REMINDER_TRIGGER"
+    const val ACTION_MARK_WATERED = "com.example.smart_plant_care.action.MARK_WATERED"
 
     private const val EXTRA_PLANT_ID = "extra_plant_id"
     private const val EXTRA_PLANT_NAME = "extra_plant_name"
+    private const val MARK_AS_WATERED_REQUEST_OFFSET = 100_000
 
     fun createNotificationChannel(context: Context) {
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -59,10 +62,28 @@ object PlantReminderScheduler {
         val pendingIntent = buildPendingIntent(context, plantId, null)
         alarmManager.cancel(pendingIntent)
         pendingIntent.cancel()
+
+        val markWateredIntent = buildMarkWateredPendingIntent(context, plantId, null)
+        markWateredIntent.cancel()
+    }
+
+    fun buildMarkWateredPendingIntent(context: Context, plantId: Int, plantName: String?): PendingIntent {
+        val intent = Intent(context, PlantReminderReceiver::class.java).apply {
+            action = ACTION_MARK_WATERED
+            putExtra(EXTRA_PLANT_ID, plantId)
+            putExtra(EXTRA_PLANT_NAME, plantName)
+        }
+        return PendingIntent.getBroadcast(
+            context,
+            plantId + MARK_AS_WATERED_REQUEST_OFFSET,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
     }
 
     private fun buildPendingIntent(context: Context, plantId: Int, plantName: String?): PendingIntent {
         val intent = Intent(context, PlantReminderReceiver::class.java).apply {
+            action = ACTION_REMINDER_TRIGGER
             putExtra(EXTRA_PLANT_ID, plantId)
             putExtra(EXTRA_PLANT_NAME, plantName)
         }
@@ -77,6 +98,8 @@ object PlantReminderScheduler {
     fun readPlantId(intent: Intent): Int = intent.getIntExtra(EXTRA_PLANT_ID, 0)
 
     fun readPlantName(intent: Intent): String = intent.getStringExtra(EXTRA_PLANT_NAME).orEmpty()
+
+    fun readAction(intent: Intent): String = intent.action.orEmpty()
 }
 
 

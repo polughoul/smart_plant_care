@@ -20,6 +20,12 @@ interface PlantDao {
     @Query("SELECT COUNT(*) > 0 FROM my_plants WHERE remotePlantId = :remotePlantId")
     fun existsByRemotePlantId(remotePlantId: Int): Boolean
 
+    @Query("SELECT * FROM my_plants WHERE id = :plantId LIMIT 1")
+    fun getPlantById(plantId: Int): MyPlantEntity?
+
+    @Query("UPDATE my_plants SET nextWateringDate = :nextWateringDate WHERE id = :plantId")
+    fun updateNextWateringDateById(plantId: Int, nextWateringDate: Long)
+
     @Update
     fun updatePlant(plant: MyPlantEntity)
 
