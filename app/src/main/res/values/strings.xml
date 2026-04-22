@@ -1,3 +1,31 @@
 <resources>
     <string name="app_name">Smart_Plant_Care</string>
+
+    <string name="settings_title">Settings</string>
+    <string name="settings_theme">Theme</string>
+    <string name="settings_theme_system">System</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_reminders_title">Watering reminders</string>
+    <string name="settings_reminders_subtitle">Use this switch to enable notifications later.</string>
+    <string name="settings_notification_permission_denied">Notifications are enabled, but permission is denied in system settings.</string>
+
+    <string name="notification_title_watering_reminder">Watering reminder</string>
+    <string name="notification_text_time_to_water">Time to water %1$s</string>
+    <string name="notification_action_mark_watered">Mark as watered</string>
+
+    <string name="garden_details_default_title">Plant details</string>
+    <string name="garden_details_not_found">Plant not found</string>
+    <string name="garden_details_readonly_info">Read-only encyclopedia info</string>
+    <string name="garden_details_section_details">Details</string>
+    <string name="garden_details_section_reminder_test">Reminder test</string>
+    <string name="garden_details_test_button">Test this plant reminder in 5s</string>
+    <string name="garden_details_snackbar_enable_reminders">Enable reminders in Settings first.</string>
+    <string name="garden_details_snackbar_permission_missing">Notification permission is missing.</string>
+    <string name="garden_details_snackbar_scheduled">Reminder for %1$s will appear in about 5 seconds.</string>
+
+    <string name="watering_status_due_now">Need to water immediately</string>
+    <string name="watering_status_today">Water today</string>
+    <string name="watering_status_tomorrow">Water tomorrow</string>
+    <string name="watering_status_after_days">Water after %1$d days</string>
 </resources>

@@ -13,6 +13,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -24,20 +25,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.example.smart_plant_care.R
 import com.example.smart_plant_care.data.local.entity.MyPlantEntity
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GardenPlantDetailsScreen(
     plant: MyPlantEntity?,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onTestReminderIn5Seconds: (() -> Unit)? = null
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(plant?.customName ?: "Plant details") },
+                title = { Text(plant?.customName ?: stringResource(R.string.garden_details_default_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -53,7 +57,7 @@ fun GardenPlantDetailsScreen(
                     .padding(paddingValues),
                 contentAlignment = Alignment.Center
             ) {
-                Text("Plant not found")
+                Text(stringResource(R.string.garden_details_not_found))
             }
             return@Scaffold
         }
@@ -99,7 +103,7 @@ fun GardenPlantDetailsScreen(
                     Text(text = plant.customName, style = MaterialTheme.typography.headlineSmall)
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Read-only encyclopedia info",
+                        text = stringResource(R.string.garden_details_readonly_info),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -108,13 +112,25 @@ fun GardenPlantDetailsScreen(
 
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text(text = "Details", style = MaterialTheme.typography.titleMedium)
+                    Text(text = stringResource(R.string.garden_details_section_details), style = MaterialTheme.typography.titleMedium)
                     Spacer(modifier = Modifier.height(8.dp))
                     facts.forEachIndexed { index, fact ->
                         if (index > 0) {
                             Spacer(modifier = Modifier.height(6.dp))
                         }
                         Text(text = fact, style = MaterialTheme.typography.bodyMedium)
+                    }
+                }
+            }
+
+            if (onTestReminderIn5Seconds != null) {
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(text = stringResource(R.string.garden_details_section_reminder_test), style = MaterialTheme.typography.titleMedium)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        OutlinedButton(onClick = onTestReminderIn5Seconds) {
+                            Text(stringResource(R.string.garden_details_test_button))
+                        }
                     }
                 }
             }

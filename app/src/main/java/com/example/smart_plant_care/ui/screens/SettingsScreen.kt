@@ -1,6 +1,7 @@
 package com.example.smart_plant_care.ui.screens
 
 import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Build
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,12 +26,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import com.example.smart_plant_care.R
 import com.example.smart_plant_care.data.preferences.ThemeMode
 import com.example.smart_plant_care.notifications.PlantReminderScheduler
 import com.example.smart_plant_care.ui.viewmodels.SettingsViewModel
-import android.content.pm.PackageManager
 
 
 @Composable
@@ -38,6 +40,7 @@ import android.content.pm.PackageManager
 fun SettingsScreen(settingsViewModel: SettingsViewModel) {
     val uiState by settingsViewModel.uiState.collectAsState()
     val context = LocalContext.current
+    val hasNotificationPermission = PlantReminderScheduler.hasNotificationPermission(context)
 
     val notificationsPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -47,7 +50,7 @@ fun SettingsScreen(settingsViewModel: SettingsViewModel) {
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Settings") })
+            TopAppBar(title = { Text(stringResource(R.string.settings_title)) })
         }
     ) { paddingValues ->
         Column(
@@ -66,22 +69,22 @@ fun SettingsScreen(settingsViewModel: SettingsViewModel) {
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Text(
-                        text = "Theme",
+                        text = stringResource(R.string.settings_theme),
                         style = MaterialTheme.typography.titleMedium
                     )
 
                     ThemeOptionRow(
-                        label = "System",
+                        label = stringResource(R.string.settings_theme_system),
                         selected = uiState.themeMode == ThemeMode.SYSTEM,
                         onClick = { settingsViewModel.onThemeModeChange(ThemeMode.SYSTEM) }
                     )
                     ThemeOptionRow(
-                        label = "Light",
+                        label = stringResource(R.string.settings_theme_light),
                         selected = uiState.themeMode == ThemeMode.LIGHT,
                         onClick = { settingsViewModel.onThemeModeChange(ThemeMode.LIGHT) }
                     )
                     ThemeOptionRow(
-                        label = "Dark",
+                        label = stringResource(R.string.settings_theme_dark),
                         selected = uiState.themeMode == ThemeMode.DARK,
                         onClick = { settingsViewModel.onThemeModeChange(ThemeMode.DARK) }
                     )
@@ -97,11 +100,11 @@ fun SettingsScreen(settingsViewModel: SettingsViewModel) {
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "Watering reminders",
+                            text = stringResource(R.string.settings_reminders_title),
                             style = MaterialTheme.typography.titleMedium
                         )
                         Text(
-                            text = "Use this switch to enable notifications later.",
+                            text = stringResource(R.string.settings_reminders_subtitle),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -129,9 +132,9 @@ fun SettingsScreen(settingsViewModel: SettingsViewModel) {
                 }
             }
 
-            if (uiState.notificationsEnabled && !PlantReminderScheduler.hasNotificationPermission(context)) {
+            if (uiState.notificationsEnabled && !hasNotificationPermission) {
                 Text(
-                    text = "Notifications are enabled, but permission is denied in system settings.",
+                    text = stringResource(R.string.settings_notification_permission_denied),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.error
                 )

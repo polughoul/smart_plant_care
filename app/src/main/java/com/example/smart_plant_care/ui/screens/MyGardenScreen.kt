@@ -1,5 +1,6 @@
 package com.example.smart_plant_care.ui.screens
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,9 +19,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.filled.Delete
+import com.example.smart_plant_care.R
 import com.example.smart_plant_care.ui.viewmodels.GardenViewModel
+import java.time.Instant
+import java.time.ZoneId
+import java.time.temporal.ChronoUnit
 
 
 @Composable
@@ -90,6 +96,7 @@ fun MyGardenScreen(
 ) {
 
     val plants by viewModel.plantsList.collectAsState()
+    val context = LocalContext.current
     var searchQuery by remember { mutableStateOf("") }
 
     val filteredPlants = remember(plants, searchQuery) {
@@ -161,7 +168,7 @@ fun MyGardenScreen(
                         items(filteredPlants) { plant ->
                             PlantCard(
                                 name = plant.customName,
-                                status = calculateDaysRemaining(plant.nextWateringDate),
+                                status = calculateDaysRemaining(context, plant.nextWateringDate),
                                 onCardClick = { onOpenPlantDetails(plant.id) },
                                 onEditClick = { onEditPlant(plant.id) },
                                 onDeleteClick = { onDeletePlant(plant.id) }
@@ -174,13 +181,18 @@ fun MyGardenScreen(
     }
 }
 
-fun calculateDaysRemaining(nextWateringMillis: Long): String {
-    val diff = nextWateringMillis - System.currentTimeMillis()
-    val days = (diff / (24 * 60 * 60 * 1000)).toInt()
+fun calculateDaysRemaining(context: Context, nextWateringMillis: Long): String {
+    val now = System.currentTimeMillis()
+    if (nextWateringMillis <= now) return context.getString(R.string.watering_status_due_now)
+
+    val zoneId = ZoneId.systemDefault()
+    val today = Instant.ofEpochMilli(now).atZone(zoneId).toLocalDate()
+    val nextDate = Instant.ofEpochMilli(nextWateringMillis).atZone(zoneId).toLocalDate()
+    val daysUntil = ChronoUnit.DAYS.between(today, nextDate).toInt()
+
     return when {
-        days < 0 -> "Need to water immediately"
-        days == 0 -> "Water today"
-        days == 1 -> "Water tomorrow"
-        else -> "Water after $days days"
+        daysUntil <= 0 -> context.getString(R.string.watering_status_today)
+        daysUntil == 1 -> context.getString(R.string.watering_status_tomorrow)
+        else -> context.getString(R.string.watering_status_after_days, daysUntil)
     }
 }

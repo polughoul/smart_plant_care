@@ -26,6 +26,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.smart_plant_care.R
 import com.example.smart_plant_care.data.local.entity.MyPlantEntity
 import com.example.smart_plant_care.data.repository.InsertPlantResult
 import com.example.smart_plant_care.data.repository.PlantRepository
@@ -268,7 +269,45 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
 
                 GardenPlantDetailsScreen(
                     plant = plant,
-                    onBackClick = { navController.popBackStack() }
+                    onBackClick = { navController.popBackStack() },
+                    onTestReminderIn5Seconds = plant?.let { selectedPlant ->
+                        {
+                            when {
+                                !settingsUiState.notificationsEnabled -> {
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            context.getString(R.string.garden_details_snackbar_enable_reminders)
+                                        )
+                                    }
+                                }
+
+                                !PlantReminderScheduler.hasNotificationPermission(context) -> {
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            context.getString(R.string.garden_details_snackbar_permission_missing)
+                                        )
+                                    }
+                                }
+
+                                else -> {
+                                    PlantReminderScheduler.scheduleReminder(
+                                        context = context,
+                                        plant = selectedPlant.copy(
+                                            nextWateringDate = System.currentTimeMillis() + 5_000L
+                                        )
+                                    )
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            context.getString(
+                                                R.string.garden_details_snackbar_scheduled,
+                                                selectedPlant.customName
+                                            )
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
                 )
             }
         }
