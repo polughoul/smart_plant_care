@@ -74,6 +74,11 @@
     <string name="edit_placeholder_name">e.g. My Kitchen Ficus</string>
     <string name="edit_change_interval">Change</string>
     <string name="edit_save_interval">Save interval</string>
+    <string name="edit_photo_label">Plant photo</string>
+    <string name="edit_photo_preview_cd">Selected plant photo</string>
+    <string name="edit_photo_pick">Pick photo</string>
+    <string name="edit_photo_change">Change photo</string>
+    <string name="edit_photo_remove">Remove photo</string>
     <plurals name="edit_water_every_days">
         <item quantity="one">Water every %1$d day</item>
         <item quantity="other">Water every %1$d days</item>
