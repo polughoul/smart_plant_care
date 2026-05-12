@@ -148,6 +148,9 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
                         gardenViewModel.deletePlant(plantId)
                         PlantReminderScheduler.cancelReminder(context, plantId)
                     },
+                    onMarkPlantWatered = { plantId ->
+                        gardenViewModel.markPlantAsWatered(plantId)
+                    },
                     onEditPlant = { plantId ->
                         navController.navigate(Screen.EditExisting.createRoute(plantId))
                     },
@@ -310,6 +313,11 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
                 GardenPlantDetailsScreen(
                     plant = plant,
                     onBackClick = { navController.popBackStack() },
+                    onMarkWateredClick = plant?.let { selectedPlant ->
+                        {
+                            gardenViewModel.markPlantAsWatered(selectedPlant.id)
+                        }
+                    },
                     onTestReminderIn5Seconds = plant?.let { selectedPlant ->
                         {
                             when {

@@ -22,6 +22,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
@@ -74,11 +75,12 @@ fun PlantCard(
     onCardClick: () -> Unit,
     onToggleSelection: () -> Unit,
     onLongPress: () -> Unit,
+    onWaterClick: () -> Unit,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
     val density = LocalDensity.current
-    val revealActionsWidth = 128.dp
+    val revealActionsWidth = 176.dp
     val revealActionsWidthPx = with(density) { revealActionsWidth.toPx() }
     var isDragging by remember { mutableStateOf(false) }
     var dragOffset by remember { mutableFloatStateOf(0f) }
@@ -148,6 +150,13 @@ fun PlantCard(
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                IconButton(onClick = onWaterClick) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = stringResource(R.string.my_garden_cd_mark_watered),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
                 IconButton(onClick = onEditClick) {
                     Icon(
                         imageVector = Icons.Default.Edit,
@@ -313,6 +322,7 @@ fun MyGardenScreen(
     viewModel: GardenViewModel,
     onNavigateToSearch: () -> Unit,
     onDeletePlant: (Int) -> Unit,
+    onMarkPlantWatered: (Int) -> Unit,
     onEditPlant: (Int) -> Unit,
     onOpenPlantDetails: (Int) -> Unit
 ) {
@@ -428,6 +438,16 @@ fun MyGardenScreen(
                             )
                             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                                 TextButton(
+                                    onClick = {
+                                        val idsToWater = selectedPlantIds.toList()
+                                        idsToWater.forEach(onMarkPlantWatered)
+                                        selectedPlantIds = emptySet()
+                                    },
+                                    enabled = selectedPlantIds.isNotEmpty()
+                                ) {
+                                    Text(stringResource(R.string.my_garden_mark_watered))
+                                }
+                                TextButton(
                                     onClick = { pendingDeleteIds = selectedPlantIds },
                                     enabled = selectedPlantIds.isNotEmpty()
                                 ) {
@@ -485,6 +505,10 @@ fun MyGardenScreen(
                                 onLongPress = {
                                     revealedPlantId = null
                                     selectedPlantIds = selectedPlantIds + plant.id
+                                },
+                                onWaterClick = {
+                                    revealedPlantId = null
+                                    onMarkPlantWatered(plant.id)
                                 },
                                 onEditClick = {
                                     revealedPlantId = null

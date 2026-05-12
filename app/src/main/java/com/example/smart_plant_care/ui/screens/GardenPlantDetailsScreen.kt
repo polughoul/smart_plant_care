@@ -37,6 +37,7 @@ import com.example.smart_plant_care.data.local.entity.MyPlantEntity
 fun GardenPlantDetailsScreen(
     plant: MyPlantEntity?,
     onBackClick: () -> Unit,
+    onMarkWateredClick: (() -> Unit)? = null,
     onTestReminderIn5Seconds: (() -> Unit)? = null
 ) {
     Scaffold(
@@ -145,6 +146,21 @@ fun GardenPlantDetailsScreen(
                             ?: stringResource(R.string.details_no_description),
                         style = MaterialTheme.typography.bodyMedium
                     )
+                }
+            }
+
+            if (onMarkWateredClick != null) {
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = stringResource(R.string.garden_details_section_actions),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        OutlinedButton(onClick = onMarkWateredClick) {
+                            Text(stringResource(R.string.garden_details_mark_watered_now))
+                        }
+                    }
                 }
             }
 

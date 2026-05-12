@@ -36,4 +36,14 @@ class PlantRepository( private val plantDao: PlantDao) {
             plantDao.deletePlantById(id)
         }
     }
+
+    suspend fun markPlantAsWatered(plantId: Int): Boolean {
+        return withContext(Dispatchers.IO) {
+            val plant = plantDao.getPlantById(plantId) ?: return@withContext false
+            val days = plant.waterIntervalDays.coerceAtLeast(1)
+            val nextWateringDate = System.currentTimeMillis() + days * 24L * 60L * 60L * 1000L
+            plantDao.updateNextWateringDateById(plantId, nextWateringDate)
+            true
+        }
+    }
 }

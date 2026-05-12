@@ -41,6 +41,18 @@ class GardenViewModel(private val repository: PlantRepository) : ViewModel() {
             repository.updatePlant(plant)
         }
     }
+
+    fun markPlantAsWatered(plantId: Int) {
+        viewModelScope.launch {
+            repository.markPlantAsWatered(plantId)
+        }
+    }
+
+    fun markPlantsAsWatered(plantIds: Collection<Int>) {
+        viewModelScope.launch {
+            plantIds.forEach { repository.markPlantAsWatered(it) }
+        }
+    }
 }
 
 class GardenViewModelFactory(private val repository: PlantRepository) : ViewModelProvider.Factory {
