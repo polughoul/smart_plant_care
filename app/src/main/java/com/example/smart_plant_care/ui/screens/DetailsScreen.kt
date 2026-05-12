@@ -28,6 +28,8 @@ import com.example.smart_plant_care.data.remote.dto.WateringBenchmark
 import com.example.smart_plant_care.ui.viewmodels.DetailsUiState
 import com.example.smart_plant_care.ui.viewmodels.DetailsViewModel
 import kotlin.math.roundToInt
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -53,7 +55,12 @@ fun DetailsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(topBarTitle) },
+                title = {
+                    Text(
+                        text = topBarTitle,
+                        modifier = Modifier.semantics { heading() }
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.common_cd_back))
@@ -107,7 +114,6 @@ fun DetailsScreen(
                     }
                 }
             }
-
             is DetailsUiState.Success -> {
                 val plant = state.plant
                 var isDescriptionExpanded by remember(plant.id) { mutableStateOf(false) }
@@ -120,7 +126,7 @@ fun DetailsScreen(
                 ) {
                     AsyncImage(
                         model = plant.defaultImage?.regularUrl ?: plant.defaultImage?.thumbnail,
-                        contentDescription = null,
+                        contentDescription = stringResource(R.string.cd_plant_photo_format, plant.commonName),
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(250.dp),
@@ -167,7 +173,6 @@ fun DetailsScreen(
                                 add(stringResource(R.string.fact_poisonous_pets_format, if (it) yesLabel else noLabel))
                             }
                         }
-
                         Spacer(modifier = Modifier.height(16.dp))
 
                         Card(modifier = Modifier.fillMaxWidth()) {
@@ -179,7 +184,6 @@ fun DetailsScreen(
                                 val sunlightText = plant.sunlight?.joinToString()?.takeIf { it.isNotBlank() }
                                     ?: guideSunlight
                                     ?: stringResource(R.string.details_unknown)
-
                                 val benchmarkText = plant.wateringBenchmark?.value?.takeIf { it.isNotBlank() }
                                 val benchmarkLabel = formatBenchmarkLabel(plant.wateringBenchmark)
                                 val guideWatering = state.careSections
@@ -197,7 +201,6 @@ fun DetailsScreen(
                                 Text(stringResource(R.string.details_water_line, waterLine))
                             }
                         }
-
                         if (quickFacts.isNotEmpty()) {
                             Spacer(modifier = Modifier.height(12.dp))
 
@@ -208,7 +211,6 @@ fun DetailsScreen(
                                         style = MaterialTheme.typography.titleMedium
                                     )
                                     Spacer(modifier = Modifier.height(8.dp))
-
                                     quickFacts.forEachIndexed { index, fact ->
                                         if (index > 0) {
                                             Spacer(modifier = Modifier.height(6.dp))
@@ -228,7 +230,6 @@ fun DetailsScreen(
                                     style = MaterialTheme.typography.titleMedium
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
-
                                 val descriptionText = plant.description?.takeIf { it.isNotBlank() }
 
                                 if (descriptionText != null) {
@@ -283,4 +284,3 @@ private fun benchmarkToDefaultDays(benchmark: WateringBenchmark?): Int {
     }
     return days.coerceIn(1, 30)
 }
-

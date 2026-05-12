@@ -31,6 +31,8 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.smart_plant_care.R
 import com.example.smart_plant_care.data.local.entity.MyPlantEntity
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,7 +45,12 @@ fun GardenPlantDetailsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(plant?.customName ?: stringResource(R.string.garden_details_default_title)) },
+                title = {
+                    Text(
+                        text = plant?.customName ?: stringResource(R.string.garden_details_default_title),
+                        modifier = Modifier.semantics { heading() }
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_cd_back))
@@ -107,7 +114,7 @@ fun GardenPlantDetailsScreen(
             if (!plant.imageUrl.isNullOrBlank()) {
                 AsyncImage(
                     model = plant.imageUrl,
-                    contentDescription = plant.customName,
+                    contentDescription = stringResource(R.string.cd_plant_photo_format, plant.customName),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(250.dp),
@@ -178,4 +185,3 @@ fun GardenPlantDetailsScreen(
         }
     }
 }
-

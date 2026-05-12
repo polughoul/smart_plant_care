@@ -177,9 +177,14 @@ fun EditScreen(
                     style = MaterialTheme.typography.titleSmall
                 )
                 if (!selectedImageUrl.isNullOrBlank()) {
+                    val photoLabel = when {
+                        customName.isNotBlank() -> customName
+                        !isManual -> speciesName
+                        else -> stringResource(R.string.cd_plant_photo_generic)
+                    }
                     AsyncImage(
                         model = selectedImageUrl,
-                        contentDescription = stringResource(R.string.edit_photo_preview_cd),
+                        contentDescription = stringResource(R.string.cd_plant_photo_format, photoLabel),
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(190.dp)

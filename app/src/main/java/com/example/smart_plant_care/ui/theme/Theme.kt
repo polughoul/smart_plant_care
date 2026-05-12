@@ -12,15 +12,43 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = LeafGreenDark,
+    onPrimary = SoilLight,
+    primaryContainer = LeafTintDark,
+    onPrimaryContainer = SoilDark,
+    secondary = MossGreenDark,
+    onSecondary = SoilLight,
+    secondaryContainer = StemLight,
+    onSecondaryContainer = SoilDark,
+    tertiary = BlossomDark,
+    onTertiary = SoilLight,
+    background = SeedlingDark,
+    onBackground = SoilDark,
+    surface = SeedlingDark,
+    onSurface = SoilDark,
+    surfaceVariant = LeafTintDark,
+    onSurfaceVariant = SoilDark,
+    outline = OutlineDark
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+    primary = LeafGreenLight,
+    onPrimary = SeedlingLight,
+    primaryContainer = LeafTintLight,
+    onPrimaryContainer = SoilLight,
+    secondary = MossGreenLight,
+    onSecondary = SeedlingLight,
+    secondaryContainer = LeafGreenDark,
+    onSecondaryContainer = SoilLight,
+    tertiary = BlossomLight,
+    onTertiary = SeedlingLight,
+    background = SeedlingLight,
+    onBackground = SoilLight,
+    surface = SeedlingLight,
+    onSurface = SoilLight,
+    surfaceVariant = LeafTintLight,
+    onSurfaceVariant = StemLight,
+    outline = OutlineLight
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),

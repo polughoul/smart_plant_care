@@ -135,4 +135,12 @@
         <item quantity="one">Water after %1$d day</item>
         <item quantity="other">Water after %1$d days</item>
     </plurals>
+
+    <string name="cd_plant_photo_format">Plant photo: %1$s</string>
+    <string name="cd_plant_photo_generic">Plant photo</string>
+    <string name="cd_selected_checkbox">Selected</string>
+    <string name="cd_selected_count_format">Selected: %1$d</string>
+    <string name="cd_action_mark_watered">Mark as watered</string>
+    <string name="cd_action_edit">Edit plant</string>
+    <string name="cd_action_delete">Delete plant</string>
 </resources>

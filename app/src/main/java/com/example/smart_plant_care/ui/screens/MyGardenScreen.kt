@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -43,15 +44,19 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.snap
 import com.example.smart_plant_care.R
 import com.example.smart_plant_care.ui.viewmodels.GardenViewModel
 import coil.compose.AsyncImage
@@ -79,17 +84,17 @@ fun PlantCard(
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
+    val selectedLabel = stringResource(R.string.cd_selected_checkbox)
     val density = LocalDensity.current
     val revealActionsWidth = 176.dp
     val revealActionsWidthPx = with(density) { revealActionsWidth.toPx() }
     var isDragging by remember { mutableStateOf(false) }
     var dragOffset by remember { mutableFloatStateOf(0f) }
-    val settledOffset by animateFloatAsState(
-        targetValue = if (isActionsRevealed) -revealActionsWidthPx else 0f,
-        animationSpec = tween(durationMillis = 180),
+    val contentOffset by animateFloatAsState(
+        targetValue = dragOffset,
+        animationSpec = if (isDragging) snap() else tween(durationMillis = 180),
         label = "plantCardSwipeOffset"
     )
-    val contentOffset = if (isDragging) dragOffset else settledOffset
 
     LaunchedEffect(isActionsRevealed, revealActionsWidthPx) {
         if (!isDragging) {
@@ -135,7 +140,10 @@ fun PlantCard(
                 trailingContent = {
                     Checkbox(
                         checked = isSelected,
-                        onCheckedChange = null
+                        onCheckedChange = null,
+                        modifier = Modifier.semantics {
+                            contentDescription = selectedLabel
+                        }
                     )
                 }
             )
@@ -146,27 +154,28 @@ fun PlantCard(
                 modifier = Modifier
                     .matchParentSize()
                     .clip(MaterialTheme.shapes.medium)
-                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .semantics { stateDescription = status },
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = onWaterClick) {
                     Icon(
                         imageVector = Icons.Default.Check,
-                        contentDescription = stringResource(R.string.my_garden_cd_mark_watered),
+                        contentDescription = stringResource(R.string.cd_action_mark_watered),
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
                 IconButton(onClick = onEditClick) {
                     Icon(
                         imageVector = Icons.Default.Edit,
-                        contentDescription = stringResource(R.string.my_garden_cd_edit)
+                        contentDescription = stringResource(R.string.cd_action_edit)
                     )
                 }
                 IconButton(onClick = onDeleteClick) {
                     Icon(
                         imageVector = Icons.Default.Delete,
-                        contentDescription = stringResource(R.string.my_garden_cd_delete),
+                        contentDescription = stringResource(R.string.cd_action_delete),
                         tint = MaterialTheme.colorScheme.error
                     )
                 }
@@ -187,12 +196,14 @@ fun PlantCard(
                             dragOffset = contentOffset
                         },
                         onDragStopped = { velocity ->
-                            isDragging = false
                             val revealThreshold = -revealActionsWidthPx * 0.45f
                             val revealByPosition = dragOffset <= revealThreshold
                             val revealByVelocity = velocity < -900f
                             val closeByVelocity = velocity > 900f
-                            onRevealChanged((revealByPosition || revealByVelocity) && !closeByVelocity)
+                            val shouldReveal = (revealByPosition || revealByVelocity) && !closeByVelocity
+                            isDragging = false
+                            dragOffset = if (shouldReveal) -revealActionsWidthPx else 0f
+                            onRevealChanged(shouldReveal)
                         }
                     )
                     .combinedClickable(
@@ -235,7 +246,7 @@ private fun PlantCardContent(
         if (!imageModel.isNullOrBlank()) {
             AsyncImage(
                 model = imageModel,
-                contentDescription = null,
+                contentDescription = stringResource(R.string.cd_plant_photo_format, name),
                 modifier = Modifier
                     .size(48.dp)
                     .clip(CircleShape),
@@ -361,21 +372,16 @@ fun MyGardenScreen(
             }
         }
     }
+    val selectedCountLabel = stringResource(R.string.cd_selected_count_format, selectedPlantIds.size)
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    AnimatedContent(
-                        targetState = selectedPlantIds.size to isSelectionMode,
-                        label = "myGardenTopBarTitle"
-                    ) { (count, selectionMode) ->
-                        if (selectionMode) {
-                            Text(stringResource(R.string.my_garden_selected_count, count))
-                        } else {
-                            Text(stringResource(R.string.my_garden_title))
-                        }
-                    }
+                    Text(
+                        text = stringResource(R.string.my_garden_title),
+                        modifier = Modifier.semantics { heading() }
+                    )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -427,7 +433,8 @@ fun MyGardenScreen(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 12.dp, vertical = 8.dp),
+                                .padding(horizontal = 12.dp, vertical = 8.dp)
+                                .semantics { stateDescription = selectedCountLabel },
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
@@ -564,7 +571,7 @@ fun MyGardenScreen(
         }
     }
 }
-
+ 
 fun calculateDaysRemaining(context: Context, nextWateringMillis: Long): String {
     val now = System.currentTimeMillis()
     if (nextWateringMillis <= now) return context.getString(R.string.watering_status_due_now)

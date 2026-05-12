@@ -16,6 +16,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
@@ -37,7 +39,12 @@ fun SearchScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.search_title)) },
+                title = {
+                    Text(
+                        text = stringResource(R.string.search_title),
+                        modifier = Modifier.semantics { heading() }
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.search_cd_back))
@@ -51,6 +58,7 @@ fun SearchScreen(
                 .padding(paddingValues)
                 .padding(16.dp)
                 .fillMaxSize()
+                .imePadding()
         ) {
             OutlinedTextField(
                 value = searchQuery,
@@ -142,7 +150,7 @@ fun ApiPlantCard(plant: ApiPlantDto, onClick: () -> Unit) {
         Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
             AsyncImage(
                 model = plant.defaultImage?.thumbnail ?: "https://via.placeholder.com/150",
-                contentDescription = plant.commonName,
+                contentDescription = stringResource(R.string.cd_plant_photo_format, plant.commonName),
                 modifier = Modifier.size(64.dp),
                 contentScale = ContentScale.Crop
             )
