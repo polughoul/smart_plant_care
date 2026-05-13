@@ -16,16 +16,21 @@ class UserPreferencesDataStore(private val context: Context) {
     private object Keys {
         val THEME_MODE: Preferences.Key<String> = stringPreferencesKey("theme_mode")
         val NOTIFICATIONS_ENABLED: Preferences.Key<Boolean> = booleanPreferencesKey("notifications_enabled")
+        val GARDEN_SORT_OPTION: Preferences.Key<String> = stringPreferencesKey("garden_sort_option")
     }
 
     val preferencesFlow: Flow<UserPreferences> = context.userPreferencesDataStore.data.map { preferences ->
         val themeMode = preferences[Keys.THEME_MODE]
             ?.let { raw -> runCatching { ThemeMode.valueOf(raw) }.getOrNull() }
             ?: ThemeMode.SYSTEM
+        val gardenSortOption = preferences[Keys.GARDEN_SORT_OPTION]
+            ?.let { raw -> runCatching { GardenSortOption.valueOf(raw) }.getOrNull() }
+            ?: GardenSortOption.NEXT_WATERING
 
         UserPreferences(
             themeMode = themeMode,
-            notificationsEnabled = preferences[Keys.NOTIFICATIONS_ENABLED] ?: true
+            notificationsEnabled = preferences[Keys.NOTIFICATIONS_ENABLED] ?: true,
+            gardenSortOption = gardenSortOption
         )
     }
 
@@ -38,6 +43,12 @@ class UserPreferencesDataStore(private val context: Context) {
     suspend fun setNotificationsEnabled(enabled: Boolean) {
         context.userPreferencesDataStore.edit { preferences ->
             preferences[Keys.NOTIFICATIONS_ENABLED] = enabled
+        }
+    }
+
+    suspend fun setGardenSortOption(option: GardenSortOption) {
+        context.userPreferencesDataStore.edit { preferences ->
+            preferences[Keys.GARDEN_SORT_OPTION] = option.name
         }
     }
 }

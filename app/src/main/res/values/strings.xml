@@ -40,6 +40,16 @@
     <string name="my_garden_cd_delete_selected">Delete selected</string>
     <string name="my_garden_cd_clear_selection">Clear selection</string>
     <string name="my_garden_mark_watered">Watered</string>
+    <string name="my_garden_sort_label">Sort by</string>
+    <string name="my_garden_sort_next_watering">Next watering</string>
+    <string name="my_garden_sort_name">Name</string>
+    <string name="my_garden_undo">Undo</string>
+    <string name="my_garden_deleted_single">Deleted "%1$s"</string>
+    <plurals name="my_garden_deleted_multiple">
+        <item quantity="one">Deleted %1$d plant</item>
+        <item quantity="other">Deleted %1$d plants</item>
+    </plurals>
+    <string name="edit_name_required_warning">Plant name is required for manual entry.</string>
 
     <string name="delete_dialog_title">Delete plants?</string>
     <string name="delete_dialog_message_single">Delete "%1$s"?</string>

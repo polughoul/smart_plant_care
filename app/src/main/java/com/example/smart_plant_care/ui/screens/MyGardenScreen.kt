@@ -34,6 +34,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,13 +59,17 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.snap
 import com.example.smart_plant_care.R
+import com.example.smart_plant_care.data.preferences.GardenSortOption
+import com.example.smart_plant_care.data.preferences.UserPreferences
+import com.example.smart_plant_care.data.preferences.UserPreferencesDataStore
 import com.example.smart_plant_care.ui.viewmodels.GardenViewModel
 import coil.compose.AsyncImage
 import java.time.Instant
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import kotlin.math.roundToInt
-
+import kotlinx.coroutines.launch
+import androidx.compose.material3.MenuAnchorType
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -103,19 +108,19 @@ fun PlantCard(
     }
 
     val containerColor by animateColorAsState(
-        targetValue = if (isSelected) {
-            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.65f)
-        } else {
-            MaterialTheme.colorScheme.surface
+        targetValue = when {
+            isSelected -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.65f)
+            isActionsRevealed -> MaterialTheme.colorScheme.surfaceVariant
+            else -> MaterialTheme.colorScheme.surface
         },
         animationSpec = tween(durationMillis = 180),
         label = "plantCardContainerColor"
     )
     val borderColor by animateColorAsState(
-        targetValue = if (isSelected) {
-            MaterialTheme.colorScheme.primary
-        } else {
-            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)
+        targetValue = when {
+            isSelected -> MaterialTheme.colorScheme.primary
+            isActionsRevealed -> MaterialTheme.colorScheme.primary
+            else -> MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)
         },
         animationSpec = tween(durationMillis = 180),
         label = "plantCardBorderColor"
@@ -340,10 +345,16 @@ fun MyGardenScreen(
 
     val plants by viewModel.plantsList.collectAsState()
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val preferencesStore = remember { UserPreferencesDataStore(context) }
+    val preferences by preferencesStore.preferencesFlow.collectAsState(initial = UserPreferences())
     var searchQuery by remember { mutableStateOf("") }
     var selectedPlantIds by remember { mutableStateOf(setOf<Int>()) }
     var pendingDeleteIds by remember { mutableStateOf(setOf<Int>()) }
     var revealedPlantId by remember { mutableStateOf<Int?>(null) }
+    val sortOption = preferences.gardenSortOption
+    var sortExpanded by remember { mutableStateOf(false) }
     val isSelectionMode = selectedPlantIds.isNotEmpty()
 
     LaunchedEffect(plants) {
@@ -372,9 +383,22 @@ fun MyGardenScreen(
             }
         }
     }
+    val sortedPlants = remember(filteredPlants, sortOption) {
+        when (sortOption) {
+            GardenSortOption.NEXT_WATERING -> filteredPlants.sortedWith(
+                compareBy<com.example.smart_plant_care.data.local.entity.MyPlantEntity> { it.nextWateringDate }
+                    .thenBy { it.customName.lowercase() }
+            )
+            GardenSortOption.NAME -> filteredPlants.sortedWith(
+                compareBy<com.example.smart_plant_care.data.local.entity.MyPlantEntity> { it.customName.lowercase() }
+                    .thenBy { it.nextWateringDate }
+            )
+        }
+    }
     val selectedCountLabel = stringResource(R.string.cd_selected_count_format, selectedPlantIds.size)
 
     Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = {
@@ -420,59 +444,68 @@ fun MyGardenScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
+                Row(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    ExposedDropdownMenuBox(
+                        expanded = sortExpanded,
+                        onExpandedChange = { sortExpanded = !sortExpanded }
+                    ) {
+                        OutlinedTextField(
+                            value = stringResource(sortOption.labelRes),
+                            onValueChange = {},
+                            readOnly = true,
+                            singleLine = true,
+                            label = { Text(stringResource(R.string.my_garden_sort_label)) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .menuAnchor(MenuAnchorType.PrimaryNotEditable, enabled = true),
+                            trailingIcon = {
+                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = sortExpanded)
+                            }
+                        )
+                        ExposedDropdownMenu(
+                            expanded = sortExpanded,
+                            onDismissRequest = { sortExpanded = false }
+                        ) {
+                            GardenSortOption.values().forEach { option ->
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(option.labelRes)) },
+                                    onClick = {
+                                        scope.launch { preferencesStore.setGardenSortOption(option) }
+                                        sortExpanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
                 AnimatedVisibility(
                     visible = isSelectionMode,
                     enter = expandVertically() + fadeIn(),
                     exit = shrinkVertically() + fadeOut()
                 ) {
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = MaterialTheme.shapes.medium,
-                        color = MaterialTheme.colorScheme.secondaryContainer
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 12.dp, vertical = 8.dp)
-                                .semantics { stateDescription = selectedCountLabel },
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = stringResource(R.string.my_garden_selected_count, selectedPlantIds.size),
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.onSecondaryContainer
-                            )
-                            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                TextButton(
-                                    onClick = {
-                                        val idsToWater = selectedPlantIds.toList()
-                                        idsToWater.forEach(onMarkPlantWatered)
-                                        selectedPlantIds = emptySet()
-                                    },
-                                    enabled = selectedPlantIds.isNotEmpty()
-                                ) {
-                                    Text(stringResource(R.string.my_garden_mark_watered))
-                                }
-                                TextButton(
-                                    onClick = { pendingDeleteIds = selectedPlantIds },
-                                    enabled = selectedPlantIds.isNotEmpty()
-                                ) {
-                                    Text(stringResource(R.string.delete_dialog_confirm))
-                                }
-                                TextButton(onClick = { selectedPlantIds = emptySet() }) {
-                                    Text(stringResource(R.string.my_garden_cd_clear_selection))
-                                }
-                            }
-                        }
-                    }
+                    SelectionActionPanel(
+                        selectedCountLabel = selectedCountLabel,
+                        selectedCount = selectedPlantIds.size,
+                        onMarkWatered = {
+                            val idsToWater = selectedPlantIds.toList()
+                            idsToWater.forEach(onMarkPlantWatered)
+                            selectedPlantIds = emptySet()
+                        },
+                        onDeleteSelected = { pendingDeleteIds = selectedPlantIds },
+                        onClearSelection = { selectedPlantIds = emptySet() }
+                    )
                 }
 
                 if (isSelectionMode) {
                     Spacer(modifier = Modifier.height(8.dp))
                 }
 
-                if (filteredPlants.isEmpty()) {
+                if (sortedPlants.isEmpty()) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
@@ -485,7 +518,7 @@ fun MyGardenScreen(
                         contentPadding = PaddingValues(bottom = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        items(filteredPlants) { plant ->
+                        items(sortedPlants) { plant ->
                             PlantCard(
                                 modifier = Modifier.animateItem(),
                                 imageModel = plant.imageUrl,
@@ -533,7 +566,21 @@ fun MyGardenScreen(
         }
 
         if (pendingDeleteIds.isNotEmpty()) {
-            val selectedNames = plants.filter { pendingDeleteIds.contains(it.id) }.map { it.customName }
+            val deletedPlants = plants.filter { pendingDeleteIds.contains(it.id) }
+            val selectedNames = deletedPlants.map { it.customName }
+            val deletedMessage = if (deletedPlants.size == 1) {
+                stringResource(
+                    R.string.my_garden_deleted_single,
+                    deletedPlants.first().customName
+                )
+            } else {
+                pluralStringResource(
+                    R.plurals.my_garden_deleted_multiple,
+                    deletedPlants.size,
+                    deletedPlants.size
+                )
+            }
+            val undoLabel = stringResource(R.string.my_garden_undo)
             val message = if (pendingDeleteIds.size == 1) {
                 stringResource(
                     R.string.delete_dialog_message_single,
@@ -557,6 +604,17 @@ fun MyGardenScreen(
                             pendingDeleteIds.forEach { onDeletePlant(it) }
                             selectedPlantIds = selectedPlantIds - pendingDeleteIds
                             pendingDeleteIds = emptySet()
+                            scope.launch {
+                                val result = snackbarHostState.showSnackbar(
+                                    message = deletedMessage,
+                                    actionLabel = undoLabel
+                                )
+                                if (result == SnackbarResult.ActionPerformed) {
+                                    deletedPlants.forEach { plant ->
+                                        viewModel.insertPlant(plant)
+                                    }
+                                }
+                            }
                         }
                     ) {
                         Text(stringResource(R.string.delete_dialog_confirm))
@@ -571,7 +629,48 @@ fun MyGardenScreen(
         }
     }
 }
- 
+
+@Composable
+private fun SelectionActionPanel(
+    selectedCountLabel: String,
+    selectedCount: Int,
+    onMarkWatered: () -> Unit,
+    onDeleteSelected: () -> Unit,
+    onClearSelection: () -> Unit
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.secondaryContainer
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 8.dp)
+                .semantics { stateDescription = selectedCountLabel },
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = stringResource(R.string.my_garden_selected_count, selectedCount),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSecondaryContainer
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                TextButton(onClick = onMarkWatered, enabled = selectedCount > 0) {
+                    Text(stringResource(R.string.my_garden_mark_watered))
+                }
+                TextButton(onClick = onDeleteSelected, enabled = selectedCount > 0) {
+                    Text(stringResource(R.string.delete_dialog_confirm))
+                }
+                TextButton(onClick = onClearSelection) {
+                    Text(stringResource(R.string.my_garden_cd_clear_selection))
+                }
+            }
+        }
+    }
+}
+
 fun calculateDaysRemaining(context: Context, nextWateringMillis: Long): String {
     val now = System.currentTimeMillis()
     if (nextWateringMillis <= now) return context.getString(R.string.watering_status_due_now)

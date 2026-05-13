@@ -39,6 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -67,6 +68,9 @@ fun EditScreen(
     val defaultManualName = stringResource(R.string.edit_default_manual_name)
     var customName by remember(initialCustomName) { mutableStateOf(initialCustomName) }
     var selectedImageUrl by remember(initialImageUrl) { mutableStateOf(initialImageUrl) }
+    var hasTriedSave by remember { mutableStateOf(false) }
+    val isNameMissing = isManual && !isEditing && customName.isBlank()
+    val canSave = !isNameMissing
     var savedWaterDays by remember(defaultWaterDays) {
         mutableIntStateOf(defaultWaterDays.coerceIn(1, 30))
     }
@@ -114,8 +118,13 @@ fun EditScreen(
         },
         floatingActionButton = {
             if (!isWaterEditorExpanded) {
+                val fabAlpha = if (canSave) 1f else 0.6f
                 ExtendedFloatingActionButton(
                     onClick = {
+                        if (!canSave) {
+                            hasTriedSave = true
+                            return@ExtendedFloatingActionButton
+                        }
                         val finalName = when {
                             customName.isNotBlank() -> customName
                             isEditing && initialCustomName.isNotBlank() -> initialCustomName
@@ -124,6 +133,7 @@ fun EditScreen(
                         }
                         onSaveClick(finalName, savedWaterDays, selectedImageUrl)
                     },
+                    modifier = Modifier.alpha(fabAlpha),
                     icon = { Icon(Icons.Default.Check, contentDescription = stringResource(R.string.edit_cd_save)) },
                     text = {
                         Text(
@@ -156,7 +166,12 @@ fun EditScreen(
 
             OutlinedTextField(
                 value = customName,
-                onValueChange = { customName = it },
+                onValueChange = {
+                    customName = it
+                    if (it.isNotBlank()) {
+                        hasTriedSave = false
+                    }
+                },
                 label = {
                     Text(
                         when {
@@ -168,7 +183,16 @@ fun EditScreen(
                 },
                 placeholder = { Text(stringResource(R.string.edit_placeholder_name)) },
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                singleLine = true,
+                isError = hasTriedSave && isNameMissing,
+                supportingText = {
+                    if (hasTriedSave && isNameMissing) {
+                        Text(
+                            text = stringResource(R.string.edit_name_required_warning),
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
             )
 
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
