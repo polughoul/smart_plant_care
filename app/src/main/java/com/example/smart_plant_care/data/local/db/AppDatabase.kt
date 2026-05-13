@@ -5,12 +5,15 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.smart_plant_care.data.local.dao.PlantDao
+import com.example.smart_plant_care.data.local.dao.WateringEventDao
 import com.example.smart_plant_care.data.local.entity.MyPlantEntity
+import com.example.smart_plant_care.data.local.entity.WateringEventEntity
 
 
-@Database(entities = [MyPlantEntity::class], version = 4, exportSchema = false)
+@Database(entities = [MyPlantEntity::class, WateringEventEntity::class], version = 6, exportSchema = false)
 abstract class AppDatabase: RoomDatabase() {
     abstract fun plantDao(): PlantDao
+    abstract fun wateringEventDao(): WateringEventDao
 
     companion object {
         @Volatile

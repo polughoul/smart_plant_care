@@ -10,6 +10,7 @@ import androidx.core.app.NotificationManagerCompat
 import com.example.smart_plant_care.MainActivity
 import com.example.smart_plant_care.R
 import com.example.smart_plant_care.data.local.db.AppDatabase
+import com.example.smart_plant_care.data.local.entity.WateringEventEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -30,12 +31,16 @@ class PlantReminderReceiver : BroadcastReceiver() {
 		CoroutineScope(Dispatchers.IO).launch {
 			try {
 				val plantDao = AppDatabase.getDatabase(context).plantDao()
+				val wateringEventDao = AppDatabase.getDatabase(context).wateringEventDao()
 				when (action) {
 					PlantReminderScheduler.ACTION_MARK_WATERED -> {
 						val plant = plantDao.getPlantById(plantId)
 						if (plant != null) {
 							val nextWateringDate = calculateNextWateringDate(plant.waterIntervalDays)
 							plantDao.updateNextWateringDateById(plantId, nextWateringDate)
+							wateringEventDao.insertEvent(
+								WateringEventEntity(plantId = plantId, wateredAt = System.currentTimeMillis())
+							)
 							val updatedPlant = plant.copy(nextWateringDate = nextWateringDate)
 							PlantReminderScheduler.scheduleReminder(context, updatedPlant)
 						}
@@ -95,5 +100,3 @@ class PlantReminderReceiver : BroadcastReceiver() {
 		return System.currentTimeMillis() + days * 24L * 60L * 60L * 1000L
 	}
 }
-
-

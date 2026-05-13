@@ -309,9 +309,11 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
                 val plantId = backStackEntry.arguments?.getString("plantId")?.toIntOrNull() ?: 0
                 val plants by gardenViewModel.plantsList.collectAsState()
                 val plant = plants.firstOrNull { it.id == plantId }
+                val recentEvents by gardenViewModel.recentWateringEvents(plantId).collectAsState(initial = emptyList())
 
                 GardenPlantDetailsScreen(
                     plant = plant,
+                    wateringEvents = recentEvents,
                     onBackClick = { navController.popBackStack() },
                     onMarkWateredClick = plant?.let { selectedPlant ->
                         {
@@ -355,11 +357,28 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
                                 }
                             }
                         }
+                    },
+                    onSaveNotes = plant?.let { selectedPlant ->
+                        { notes ->
+                            gardenViewModel.updatePlant(selectedPlant.copy(notes = notes))
+                        }
+                    },
+                    onNotesSaved = {
+                        scope.launch {
+                            snackbarHostState.showSnackbar(
+                                context.getString(R.string.garden_details_notes_saved)
+                            )
+                        }
+                    },
+                    onViewAllHistory = {
+                        scope.launch {
+                            snackbarHostState.showSnackbar(
+                                context.getString(R.string.garden_details_history_coming_soon)
+                            )
+                        }
                     }
                 )
             }
         }
     }
 }
-
-

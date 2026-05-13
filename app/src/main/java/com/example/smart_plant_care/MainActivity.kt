@@ -24,7 +24,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val db = remember { AppDatabase.getDatabase(applicationContext) }
-            val repository = remember { PlantRepository(db.plantDao()) }
+            val repository = remember { PlantRepository(db.plantDao(), db.wateringEventDao()) }
             val settingsViewModel: SettingsViewModel = viewModel()
             val settingsUiState by settingsViewModel.uiState.collectAsState()
 
@@ -46,4 +46,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-

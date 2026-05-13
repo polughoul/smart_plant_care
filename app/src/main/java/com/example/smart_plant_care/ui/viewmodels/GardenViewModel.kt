@@ -4,8 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.smart_plant_care.data.local.entity.MyPlantEntity
+import com.example.smart_plant_care.data.local.entity.WateringEventEntity
 import com.example.smart_plant_care.data.repository.InsertPlantResult
 import com.example.smart_plant_care.data.repository.PlantRepository
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -13,7 +15,8 @@ import kotlinx.coroutines.launch
 
 
 class GardenViewModel(private val repository: PlantRepository) : ViewModel() {
-    val plantsList: StateFlow<List<MyPlantEntity>> = repository.getAllPlants().stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(5000), initialValue = emptyList())
+    val plantsList: StateFlow<List<MyPlantEntity>> = repository.getAllPlants()
+        .stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(5000), initialValue = emptyList())
 
     fun addTestPlant() {
         viewModelScope.launch {
@@ -53,8 +56,15 @@ class GardenViewModel(private val repository: PlantRepository) : ViewModel() {
             plantIds.forEach { repository.markPlantAsWatered(it) }
         }
     }
-}
 
+    fun recentWateringEvents(plantId: Int, limit: Int = 3): Flow<List<WateringEventEntity>> {
+        return repository.getRecentWateringEvents(plantId, limit)
+    }
+
+    fun allWateringEvents(plantId: Int): Flow<List<WateringEventEntity>> {
+        return repository.getAllWateringEvents(plantId)
+    }
+}
 class GardenViewModelFactory(private val repository: PlantRepository) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(GardenViewModel::class.java)) {

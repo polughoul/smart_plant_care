@@ -3,6 +3,7 @@ package com.example.smart_plant_care.ui.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,6 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Card
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -31,16 +33,33 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.smart_plant_care.R
 import com.example.smart_plant_care.data.local.entity.MyPlantEntity
+import com.example.smart_plant_care.data.local.entity.WateringEventEntity
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalFocusManager
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
+import androidx.compose.material3.TextButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GardenPlantDetailsScreen(
     plant: MyPlantEntity?,
+    wateringEvents: List<WateringEventEntity> = emptyList(),
     onBackClick: () -> Unit,
     onMarkWateredClick: (() -> Unit)? = null,
-    onTestReminderIn5Seconds: (() -> Unit)? = null
+    onTestReminderIn5Seconds: (() -> Unit)? = null,
+    onSaveNotes: ((String?) -> Unit)? = null,
+    onNotesSaved: (() -> Unit)? = null,
+    onViewAllHistory: (() -> Unit)? = null
 ) {
     Scaffold(
         topBar = {
@@ -69,6 +88,16 @@ fun GardenPlantDetailsScreen(
                 Text(stringResource(R.string.garden_details_not_found))
             }
             return@Scaffold
+        }
+
+        val focusManager = LocalFocusManager.current
+        var notesText by rememberSaveable(plant.id) { mutableStateOf(plant.notes.orEmpty()) }
+        val notesChanged = notesText != plant.notes.orEmpty()
+
+        LaunchedEffect(plant.notes) {
+            if (!notesChanged) {
+                notesText = plant.notes.orEmpty()
+            }
         }
 
         val yesLabel = stringResource(R.string.common_yes)
@@ -156,6 +185,83 @@ fun GardenPlantDetailsScreen(
                 }
             }
 
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(R.string.garden_details_notes_title),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        IconButton(
+                            onClick = {
+                                val normalized = notesText.trim().ifBlank { null }
+                                onSaveNotes?.invoke(normalized)
+                                focusManager.clearFocus()
+                                onNotesSaved?.invoke()
+                            },
+                            enabled = notesChanged && onSaveNotes != null
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = stringResource(R.string.garden_details_notes_save)
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = notesText,
+                        onValueChange = { notesText = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text(stringResource(R.string.garden_details_notes_label)) },
+                        placeholder = { Text(stringResource(R.string.garden_details_notes_placeholder)) },
+                        minLines = 3
+                    )
+                }
+            }
+
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(R.string.garden_details_history_title),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        TextButton(
+                            onClick = { onViewAllHistory?.invoke() },
+                            enabled = onViewAllHistory != null
+                        ) {
+                            Text(stringResource(R.string.garden_details_history_view_all))
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    if (wateringEvents.isEmpty()) {
+                        Text(
+                            text = stringResource(R.string.garden_details_history_empty),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    } else {
+                        wateringEvents.forEachIndexed { index, event ->
+                            if (index > 0) {
+                                Spacer(modifier = Modifier.height(6.dp))
+                            }
+                            val formattedDate = formatWateredDate(event.wateredAt)
+                            Text(
+                                text = stringResource(R.string.garden_details_history_item, formattedDate),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+                }
+            }
+
             if (onMarkWateredClick != null) {
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(16.dp)) {
@@ -184,4 +290,10 @@ fun GardenPlantDetailsScreen(
             }
         }
     }
+}
+
+private fun formatWateredDate(epochMillis: Long): String {
+    val date = Instant.ofEpochMilli(epochMillis).atZone(ZoneId.systemDefault()).toLocalDate()
+    val formatter = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.getDefault())
+    return formatter.format(date)
 }
