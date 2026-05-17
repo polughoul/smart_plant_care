@@ -1,7 +1,6 @@
 package com.example.smart_plant_care.ui.screens
 
 import android.content.Context
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
@@ -20,7 +19,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Edit
@@ -58,6 +56,8 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.snap
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Sort
 import com.example.smart_plant_care.R
 import com.example.smart_plant_care.data.preferences.GardenSortOption
 import com.example.smart_plant_care.data.preferences.UserPreferences
@@ -69,7 +69,6 @@ import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
-import androidx.compose.material3.MenuAnchorType
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -431,48 +430,56 @@ fun MyGardenScreen(
                     .padding(paddingValues)
                     .padding(horizontal = 16.dp)
             ) {
-                OutlinedTextField(
-                    value = searchQuery,
-                    onValueChange = { searchQuery = it },
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 16.dp),
-                    label = { Text(stringResource(R.string.my_garden_search_label)) },
-                    placeholder = { Text(stringResource(R.string.my_garden_search_placeholder)) },
-                    singleLine = true
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth()
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    ExposedDropdownMenuBox(
-                        expanded = sortExpanded,
-                        onExpandedChange = { sortExpanded = !sortExpanded }
-                    ) {
-                        OutlinedTextField(
-                            value = stringResource(sortOption.labelRes),
-                            onValueChange = {},
-                            readOnly = true,
-                            singleLine = true,
-                            label = { Text(stringResource(R.string.my_garden_sort_label)) },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .menuAnchor(MenuAnchorType.PrimaryNotEditable, enabled = true),
-                            trailingIcon = {
-                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = sortExpanded)
-                            }
-                        )
-                        ExposedDropdownMenu(
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        modifier = Modifier.weight(1f),
+                        label = { Text(stringResource(R.string.my_garden_search_label)) },
+                        placeholder = { Text(stringResource(R.string.my_garden_search_placeholder)) },
+                        singleLine = true
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Box {
+                        IconButton(
+                            onClick = { sortExpanded = true }
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.Sort,
+                                contentDescription = stringResource(R.string.my_garden_sort_label)
+                            )
+                        }
+
+                        DropdownMenu(
                             expanded = sortExpanded,
                             onDismissRequest = { sortExpanded = false }
                         ) {
-                            GardenSortOption.values().forEach { option ->
+                            GardenSortOption.entries.forEach { option ->
                                 DropdownMenuItem(
-                                    text = { Text(stringResource(option.labelRes)) },
+                                    text = {
+                                        Text(stringResource(option.labelRes))
+                                    },
+                                    leadingIcon = {
+                                        if (option == sortOption) {
+                                            Icon(
+                                                imageVector = Icons.Default.Check,
+                                                contentDescription = null
+                                            )
+                                        } else {
+                                            Spacer(modifier = Modifier.size(24.dp))
+                                        }
+                                    },
                                     onClick = {
-                                        scope.launch { preferencesStore.setGardenSortOption(option) }
+                                        scope.launch {
+                                            preferencesStore.setGardenSortOption(option)
+                                        }
                                         sortExpanded = false
                                     }
                                 )

@@ -36,13 +36,6 @@ import com.example.smart_plant_care.data.local.entity.MyPlantEntity
 import com.example.smart_plant_care.data.local.entity.WateringEventEntity
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalFocusManager
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -57,8 +50,7 @@ fun GardenPlantDetailsScreen(
     onBackClick: () -> Unit,
     onMarkWateredClick: (() -> Unit)? = null,
     onTestReminderIn5Seconds: (() -> Unit)? = null,
-    onSaveNotes: ((String?) -> Unit)? = null,
-    onNotesSaved: (() -> Unit)? = null,
+    onOpenNotes: (() -> Unit)? = null,
     onViewAllHistory: (() -> Unit)? = null
 ) {
     Scaffold(
@@ -88,16 +80,6 @@ fun GardenPlantDetailsScreen(
                 Text(stringResource(R.string.garden_details_not_found))
             }
             return@Scaffold
-        }
-
-        val focusManager = LocalFocusManager.current
-        var notesText by rememberSaveable(plant.id) { mutableStateOf(plant.notes.orEmpty()) }
-        val notesChanged = notesText != plant.notes.orEmpty()
-
-        LaunchedEffect(plant.notes) {
-            if (!notesChanged) {
-                notesText = plant.notes.orEmpty()
-            }
         }
 
         val yesLabel = stringResource(R.string.common_yes)
@@ -196,29 +178,28 @@ fun GardenPlantDetailsScreen(
                             text = stringResource(R.string.garden_details_notes_title),
                             style = MaterialTheme.typography.titleMedium
                         )
-                        IconButton(
-                            onClick = {
-                                val normalized = notesText.trim().ifBlank { null }
-                                onSaveNotes?.invoke(normalized)
-                                focusManager.clearFocus()
-                                onNotesSaved?.invoke()
-                            },
-                            enabled = notesChanged && onSaveNotes != null
+
+                        TextButton(
+                            onClick = { onOpenNotes?.invoke() },
+                            enabled = onOpenNotes != null
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = stringResource(R.string.garden_details_notes_save)
+                            Text(
+                                text = if (plant.noteText.isNullOrBlank()) {
+                                    "Add"
+                                } else {
+                                    "Edit"
+                                }
                             )
                         }
                     }
+
                     Spacer(modifier = Modifier.height(8.dp))
-                    OutlinedTextField(
-                        value = notesText,
-                        onValueChange = { notesText = it },
-                        modifier = Modifier.fillMaxWidth(),
-                        label = { Text(stringResource(R.string.garden_details_notes_label)) },
-                        placeholder = { Text(stringResource(R.string.garden_details_notes_placeholder)) },
-                        minLines = 3
+
+                    Text(
+                        text = plant.noteText?.takeIf { it.isNotBlank() } ?: "No notes yet",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 3
                     )
                 }
             }

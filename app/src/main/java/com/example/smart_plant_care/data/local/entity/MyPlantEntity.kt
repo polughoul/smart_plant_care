@@ -30,6 +30,6 @@ data class MyPlantEntity(
     val isMedicinal: Boolean = false,
     val isPoisonousToHumans: Boolean = false,
     val isPoisonousToPets: Boolean = false,
-    val notes: String? = null,
+    val noteText: String? = null,
     val imageUrl: String? = null
 )

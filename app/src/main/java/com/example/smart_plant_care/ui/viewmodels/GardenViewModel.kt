@@ -18,14 +18,6 @@ class GardenViewModel(private val repository: PlantRepository) : ViewModel() {
     val plantsList: StateFlow<List<MyPlantEntity>> = repository.getAllPlants()
         .stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(5000), initialValue = emptyList())
 
-    fun addTestPlant() {
-        viewModelScope.launch {
-            val testPlant = MyPlantEntity(customName = "Test Plant ${System.currentTimeMillis() % 1000}", speciesName = "Test Species", waterIntervalDays = 7, nextWateringDate = System.currentTimeMillis()
-            )
-            repository.insertPlant(testPlant)
-        }
-    }
-
     fun deletePlant(plantId: Int) {
         viewModelScope.launch {
             repository.deletePlant(plantId)

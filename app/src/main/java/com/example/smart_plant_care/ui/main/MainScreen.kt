@@ -46,8 +46,11 @@ import com.example.smart_plant_care.ui.viewmodels.GardenViewModel
 import com.example.smart_plant_care.ui.viewmodels.GardenViewModelFactory
 import com.example.smart_plant_care.ui.screens.DetailsScreen
 import com.example.smart_plant_care.ui.viewmodels.SettingsViewModel
+import com.example.smart_plant_care.ui.screens.PlantNotesScreen
+import com.example.smart_plant_care.ui.screens.WateringHistoryScreen
 import java.net.URLDecoder.decode
 import kotlinx.coroutines.launch
+
 
 
 @Composable
@@ -358,25 +361,57 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
                             }
                         }
                     },
-                    onSaveNotes = plant?.let { selectedPlant ->
-                        { notes ->
-                            gardenViewModel.updatePlant(selectedPlant.copy(notes = notes))
+                    onOpenNotes = plant?.let { selectedPlant ->
+                        {
+                            navController.navigate(Screen.PlantNotes.createRoute(selectedPlant.id))
                         }
                     },
-                    onNotesSaved = {
-                        scope.launch {
-                            snackbarHostState.showSnackbar(
-                                context.getString(R.string.garden_details_notes_saved)
-                            )
-                        }
-                    },
-                    onViewAllHistory = {
-                        scope.launch {
-                            snackbarHostState.showSnackbar(
-                                context.getString(R.string.garden_details_history_coming_soon)
-                            )
+                    onViewAllHistory = plant?.let { selectedPlant ->
+                        {
+                            navController.navigate(Screen.WateringHistory.createRoute(selectedPlant.id))
                         }
                     }
+                )
+            }
+            composable(Screen.PlantNotes.route) { backStackEntry ->
+                val plantId = backStackEntry.arguments?.getString("plantId")?.toIntOrNull() ?: 0
+                val plants by gardenViewModel.plantsList.collectAsState()
+                val plant = plants.firstOrNull { it.id == plantId }
+
+                PlantNotesScreen(
+                    plant = plant,
+                    onBackClick = { navController.popBackStack() },
+                    onSaveClick = { text ->
+                        if (plant != null) {
+                            gardenViewModel.updatePlant(
+                                plant.copy(
+                                    noteText = text
+                                )
+                            )
+
+                            scope.launch {
+                                snackbarHostState.showSnackbar(
+                                    context.getString(R.string.garden_details_notes_saved)
+                                )
+                            }
+
+                            navController.popBackStack()
+                        }
+                    }
+                )
+            }
+            composable(Screen.WateringHistory.route) { backStackEntry ->
+                val plantId = backStackEntry.arguments?.getString("plantId")?.toIntOrNull() ?: 0
+                val plants by gardenViewModel.plantsList.collectAsState()
+                val plant = plants.firstOrNull { it.id == plantId }
+                val wateringEvents by gardenViewModel
+                    .allWateringEvents(plantId)
+                    .collectAsState(initial = emptyList())
+
+                WateringHistoryScreen(
+                    plant = plant,
+                    wateringEvents = wateringEvents,
+                    onBackClick = { navController.popBackStack() }
                 )
             }
         }

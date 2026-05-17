@@ -26,4 +26,12 @@ sealed class Screen(val route: String) {
         fun createRoute(plantId: Int): String = "garden_details/$plantId"
     }
 
+    object PlantNotes : Screen("plant_notes/{plantId}") {
+        fun createRoute(plantId: Int): String = "plant_notes/$plantId"
+    }
+
+    object WateringHistory : Screen("watering_history/{plantId}") {
+        fun createRoute(plantId: Int): String = "watering_history/$plantId"
+    }
+
 }

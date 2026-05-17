@@ -1,0 +1,126 @@
+package com.example.smart_plant_care.ui.screens
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import com.example.smart_plant_care.R
+import com.example.smart_plant_care.data.local.entity.MyPlantEntity
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PlantNotesScreen(
+    plant: MyPlantEntity?,
+    onBackClick: () -> Unit,
+    onSaveClick: (String?) -> Unit
+) {
+    var noteText by rememberSaveable(plant?.id) {
+        mutableStateOf(plant?.noteText.orEmpty())
+    }
+
+    LaunchedEffect(plant?.id, plant?.noteText) {
+        noteText = plant?.noteText.orEmpty()
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text("Notes")
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBackClick) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.common_cd_back)
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(
+                        onClick = {
+                            onSaveClick(noteText.trim().ifBlank { null })
+                        },
+                        enabled = plant != null
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = "Save notes"
+                        )
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
+        if (plant == null) {
+            Text(
+                text = stringResource(R.string.garden_details_not_found),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(16.dp)
+            )
+            return@Scaffold
+        }
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(16.dp)
+        ) {
+            Text(
+                text = plant.customName,
+                style = MaterialTheme.typography.titleMedium
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = noteText,
+                onValueChange = { noteText = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                label = { Text("Note") },
+                placeholder = { Text("Write your note here") },
+                minLines = 10
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = {
+                    onSaveClick(noteText.trim().ifBlank { null })
+                },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = plant != null
+            ) {
+                Text("Save")
+            }
+        }
+    }
+}

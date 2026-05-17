@@ -162,5 +162,4 @@
     <string name="garden_details_history_view_all">View all</string>
     <string name="garden_details_history_empty">No watering history yet</string>
     <string name="garden_details_history_item">Watered on %1$s</string>
-    <string name="garden_details_history_coming_soon">History view coming soon</string>
 </resources>
