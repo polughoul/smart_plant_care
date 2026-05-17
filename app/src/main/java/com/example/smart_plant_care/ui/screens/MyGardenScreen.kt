@@ -22,7 +22,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -58,6 +57,14 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.snap
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarData
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import kotlinx.coroutines.delay
 import com.example.smart_plant_care.R
 import com.example.smart_plant_care.data.preferences.GardenSortOption
 import com.example.smart_plant_care.data.preferences.UserPreferences
@@ -69,6 +76,7 @@ import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
+
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -263,10 +271,10 @@ private fun PlantCardContent(
                     .background(MaterialTheme.colorScheme.secondaryContainer, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Default.Info,
+                Image(
+                    painter = painterResource(id = R.drawable.flower_icon),
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSecondaryContainer
+                    modifier = Modifier.size(34.dp)
                 )
             }
         }
@@ -327,6 +335,93 @@ private fun PulsingAddFab(
             shape = CircleShape
         ) {
             Icon(Icons.Default.Add, contentDescription = stringResource(R.string.my_garden_fab_cd))
+        }
+    }
+}
+
+@Composable
+private fun UndoSnackbar(
+    snackbarData: SnackbarData
+) {
+    var targetProgress by remember(snackbarData) { mutableFloatStateOf(1f) }
+
+    val progress by animateFloatAsState(
+        targetValue = targetProgress,
+        animationSpec = tween(
+            durationMillis = 3000,
+            easing = LinearEasing
+        ),
+        label = "undoSnackbarProgress"
+    )
+
+    LaunchedEffect(snackbarData) {
+        targetProgress = 0f
+        delay(3000)
+        snackbarData.dismiss()
+    }
+
+    Snackbar(
+        modifier = Modifier.padding(12.dp),
+        action = {
+            snackbarData.visuals.actionLabel?.let { actionLabel ->
+                TextButton(
+                    onClick = {
+                        snackbarData.performAction()
+                    }
+                ) {
+                    Text(actionLabel)
+                }
+            }
+        }
+    ) {
+        Column {
+            Text(text = snackbarData.visuals.message)
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            LinearProgressIndicator(
+                progress = { progress },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(3.dp)
+                    .clip(MaterialTheme.shapes.small)
+            )
+        }
+    }
+}
+
+@Composable
+private fun MyGardenHeader() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(120.dp)
+            .background(
+                brush = androidx.compose.ui.graphics.Brush.verticalGradient(
+                    colors = listOf(
+                        MaterialTheme.colorScheme.primaryContainer,
+                        MaterialTheme.colorScheme.surface
+                    )
+                )
+            )
+            .padding(horizontal = 24.dp, vertical = 20.dp),
+        contentAlignment = Alignment.BottomStart
+    ) {
+        Column {
+            Text(
+                text = stringResource(R.string.my_garden_title),
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                modifier = Modifier.semantics { heading() }
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = "Take care of your plants",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.75f)
+            )
         }
     }
 }
@@ -397,20 +492,9 @@ fun MyGardenScreen(
     val selectedCountLabel = stringResource(R.string.cd_selected_count_format, selectedPlantIds.size)
 
     Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState){snackbarData -> UndoSnackbar(snackbarData=snackbarData)} },
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(R.string.my_garden_title),
-                        modifier = Modifier.semantics { heading() }
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                )
-            )
+            MyGardenHeader()
         },
         floatingActionButton = {
             if (!isSelectionMode) {
@@ -614,7 +698,8 @@ fun MyGardenScreen(
                             scope.launch {
                                 val result = snackbarHostState.showSnackbar(
                                     message = deletedMessage,
-                                    actionLabel = undoLabel
+                                    actionLabel = undoLabel,
+                                    duration = SnackbarDuration.Indefinite
                                 )
                                 if (result == SnackbarResult.ActionPerformed) {
                                     deletedPlants.forEach { plant ->
