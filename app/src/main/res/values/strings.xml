@@ -102,13 +102,6 @@
     <string name="garden_details_default_title">Plant details</string>
     <string name="garden_details_not_found">Plant not found</string>
     <string name="garden_details_section_details">Details</string>
-    <string name="garden_details_section_actions">Actions</string>
-    <string name="garden_details_mark_watered_now">Mark watered now</string>
-    <string name="garden_details_section_reminder_test">Reminder test</string>
-    <string name="garden_details_test_button">Test this plant reminder in 5s</string>
-    <string name="garden_details_snackbar_enable_reminders">Enable reminders in Settings first.</string>
-    <string name="garden_details_snackbar_permission_missing">Notification permission is missing.</string>
-    <string name="garden_details_snackbar_scheduled">Reminder for %1$s will appear in about 5 seconds.</string>
     <string name="fact_species_format">Species: %1$s</string>
     <string name="fact_scientific_name_format">Scientific name: %1$s</string>
     <string name="fact_family_format">Family: %1$s</string>

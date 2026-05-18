@@ -23,9 +23,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Card
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -63,8 +61,6 @@ fun GardenPlantDetailsScreen(
     plant: MyPlantEntity?,
     wateringEvents: List<WateringEventEntity> = emptyList(),
     onBackClick: () -> Unit,
-    onMarkWateredClick: (() -> Unit)? = null,
-    onTestReminderIn5Seconds: (() -> Unit)? = null,
     onOpenNotes: (() -> Unit)? = null,
     onEditDetails: (() -> Unit)? = null,
     onViewAllHistory: (() -> Unit)? = null
@@ -275,26 +271,6 @@ fun GardenPlantDetailsScreen(
                             text = stringResource(R.string.garden_details_history_item, formattedDate),
                             style = MaterialTheme.typography.bodyMedium
                         )
-                    }
-                }
-            }
-
-            if (onMarkWateredClick != null) {
-                DetailsSectionCard(
-                    title = stringResource(R.string.garden_details_section_actions)
-                ) {
-                    OutlinedButton(onClick = onMarkWateredClick) {
-                        Text(stringResource(R.string.garden_details_mark_watered_now))
-                    }
-                }
-            }
-
-            if (onTestReminderIn5Seconds != null) {
-                DetailsSectionCard(
-                    title = stringResource(R.string.garden_details_section_reminder_test)
-                ) {
-                    OutlinedButton(onClick = onTestReminderIn5Seconds) {
-                        Text(stringResource(R.string.garden_details_test_button))
                     }
                 }
             }

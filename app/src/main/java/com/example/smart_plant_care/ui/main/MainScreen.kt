@@ -319,49 +319,6 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
                     plant = plant,
                     wateringEvents = recentEvents,
                     onBackClick = { navController.popBackStack() },
-                    onMarkWateredClick = plant?.let { selectedPlant ->
-                        {
-                            gardenViewModel.markPlantAsWatered(selectedPlant.id)
-                        }
-                    },
-                    onTestReminderIn5Seconds = plant?.let { selectedPlant ->
-                        {
-                            when {
-                                !settingsUiState.notificationsEnabled -> {
-                                    scope.launch {
-                                        snackbarHostState.showSnackbar(
-                                            context.getString(R.string.garden_details_snackbar_enable_reminders)
-                                        )
-                                    }
-                                }
-
-                                !PlantReminderScheduler.hasNotificationPermission(context) -> {
-                                    scope.launch {
-                                        snackbarHostState.showSnackbar(
-                                            context.getString(R.string.garden_details_snackbar_permission_missing)
-                                        )
-                                    }
-                                }
-
-                                else -> {
-                                    PlantReminderScheduler.scheduleReminder(
-                                        context = context,
-                                        plant = selectedPlant.copy(
-                                            nextWateringDate = System.currentTimeMillis() + 5_000L
-                                        )
-                                    )
-                                    scope.launch {
-                                        snackbarHostState.showSnackbar(
-                                            context.getString(
-                                                R.string.garden_details_snackbar_scheduled,
-                                                selectedPlant.customName
-                                            )
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    },
                     onOpenNotes = plant?.let { selectedPlant ->
                         {
                             navController.navigate(Screen.PlantNotes.createRoute(selectedPlant.id))
