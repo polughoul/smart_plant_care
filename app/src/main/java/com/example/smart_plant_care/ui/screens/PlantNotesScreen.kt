@@ -6,10 +6,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -48,6 +52,7 @@ fun PlantNotesScreen(
     }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
         topBar = {
             TopAppBar(
                 title = {
@@ -101,25 +106,49 @@ fun PlantNotesScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            OutlinedTextField(
-                value = noteText,
-                onValueChange = { noteText = normalizeNoteInput(it) },
+            Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
-                label = { Text(stringResource(R.string.notes_screen_label)) },
-                placeholder = { Text(stringResource(R.string.notes_screen_placeholder)) },
-                minLines = 10,
-                supportingText = {
-                    Text(
-                        stringResource(
-                            R.string.notes_screen_counter_format,
-                            noteText.length,
-                            NOTE_MAX_LENGTH
-                        )
+                shape = MaterialTheme.shapes.large,
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+                )
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp)
+                ) {
+                    OutlinedTextField(
+                        value = noteText,
+                        onValueChange = { noteText = normalizeNoteInput(it) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        label = { Text(stringResource(R.string.notes_screen_label)) },
+                        placeholder = { Text(stringResource(R.string.notes_screen_placeholder)) },
+                        minLines = 10
                     )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        Text(
+                            text = stringResource(
+                                R.string.notes_screen_counter_format,
+                                noteText.length,
+                                NOTE_MAX_LENGTH
+                            ),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
-            )
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 

@@ -17,6 +17,8 @@
     <string name="common_no">No</string>
     <string name="common_cd_back">Back</string>
     <string name="common_cd_add">Add</string>
+    <string name="common_add">Add</string>
+    <string name="common_edit">Edit</string>
     <string name="common_save">Save</string>
 
     <string name="nav_my_garden">My Garden</string>
@@ -159,6 +161,7 @@
     <string name="garden_details_notes_placeholder">e.g. Near the window, rotate weekly</string>
     <string name="garden_details_notes_save">Save notes</string>
     <string name="garden_details_notes_saved">Notes saved</string>
+    <string name="garden_details_notes_empty">No notes yet</string>
     <string name="garden_details_history_title">Watering history</string>
     <string name="garden_details_history_view_all">View all</string>
     <string name="garden_details_history_empty">No watering history yet</string>
@@ -193,4 +196,9 @@
     <string name="details_edit_label_poisonous_humans">Poisonous to humans</string>
     <string name="details_edit_label_poisonous_pets">Poisonous to pets</string>
     <string name="details_edit_counter_format">%1$d/%2$d</string>
+    <string name="details_edit_section_basic">Basic info</string>
+    <string name="details_edit_section_care">Care &amp; environment</string>
+    <string name="details_edit_section_harvest">Harvest</string>
+    <string name="details_edit_section_description">Description</string>
+    <string name="details_edit_section_safety">Safety</string>
 </resources>

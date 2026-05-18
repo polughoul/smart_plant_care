@@ -1,5 +1,15 @@
 package com.example.smart_plant_care.ui.screens
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.CardDefaults
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -165,218 +175,235 @@ fun GardenPlantDetailsScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            if (!plant.imageUrl.isNullOrBlank()) {
-                AsyncImage(
-                    model = plant.imageUrl,
-                    contentDescription = stringResource(R.string.cd_plant_photo_format, plant.customName),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(250.dp),
-                    contentScale = ContentScale.Crop
-                )
-            }
+            PlantDetailsHero(plant = plant)
 
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(text = plant.customName, style = MaterialTheme.typography.headlineSmall)
-                }
-            }
-
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = stringResource(R.string.garden_details_section_details),
-                            style = MaterialTheme.typography.titleMedium
-                        )
-
-                        TextButton(
-                            onClick = { onEditDetails?.invoke() },
-                            enabled = onEditDetails != null
-                        ) {
-                            Text("Edit")
-                        }
+            DetailsSectionCard(
+                title = stringResource(R.string.garden_details_section_details),
+                actionText = stringResource(R.string.common_edit),
+                onActionClick = onEditDetails
+            ) {
+                facts.forEachIndexed { index, fact ->
+                    if (index > 0) {
+                        Spacer(modifier = Modifier.height(6.dp))
                     }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    facts.forEachIndexed { index, fact ->
-                        if (index > 0) {
-                            Spacer(modifier = Modifier.height(6.dp))
-                        }
-                        Text(
-                            text = fact,
-                            style = MaterialTheme.typography.bodyMedium,
-                            maxLines = 3,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                }
-            }
-
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = stringResource(R.string.details_description),
-                            style = MaterialTheme.typography.titleMedium
-                        )
-
-                        TextButton(
-                            onClick = { onEditDetails?.invoke() },
-                            enabled = onEditDetails != null
-                        ) {
-                            Text("Edit")
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
                     Text(
-                        text = plant.description?.takeIf { it.isNotBlank() }
-                            ?: stringResource(R.string.details_no_description),
+                        text = fact,
                         style = MaterialTheme.typography.bodyMedium,
-                        maxLines = 6,
+                        maxLines = 3,
                         overflow = TextOverflow.Ellipsis
                     )
                 }
             }
 
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = stringResource(R.string.garden_details_notes_title),
-                            style = MaterialTheme.typography.titleMedium
-                        )
+            DetailsSectionCard(
+                title = stringResource(R.string.details_description),
+                actionText = stringResource(R.string.common_edit),
+                onActionClick = onEditDetails
+            ) {
+                Text(
+                    text = plant.description?.takeIf { it.isNotBlank() }
+                        ?: stringResource(R.string.details_no_description),
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 6,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
 
+            DetailsSectionCard(
+                title = stringResource(R.string.garden_details_notes_title),
+                actionText = stringResource(
+                    if (plant.noteText.isNullOrBlank()) {
+                        R.string.common_add
+                    } else {
+                        R.string.common_edit
+                    }
+                ),
+                onActionClick = onOpenNotes
+            ) {
+                val noteText = plant.noteText?.takeIf { it.isNotBlank() }
+
+                if (noteText == null) {
+                    Text(
+                        text = stringResource(R.string.garden_details_notes_empty),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                } else {
+                    Text(
+                        text = noteText,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = if (isNoteExpanded) Int.MAX_VALUE else 4,
+                        overflow = TextOverflow.Ellipsis
+                    )
+
+                    if (noteText.length > 160 || noteText.lines().size > 4) {
                         TextButton(
-                            onClick = { onOpenNotes?.invoke() },
-                            enabled = onOpenNotes != null
+                            onClick = { isNoteExpanded = !isNoteExpanded }
                         ) {
                             Text(
-                                text = if (plant.noteText.isNullOrBlank()) {
-                                    "Add"
-                                } else {
-                                    "Edit"
-                                }
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    val noteText = plant.noteText?.takeIf { it.isNotBlank() }
-
-                    if (noteText == null) {
-                        Text(
-                            text = "No notes yet",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    } else {
-                        Text(
-                            text = noteText,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = if (isNoteExpanded) Int.MAX_VALUE else 4,
-                            overflow = TextOverflow.Ellipsis
-                        )
-
-                        if (noteText.length > 160 || noteText.lines().size > 4) {
-                            TextButton(
-                                onClick = { isNoteExpanded = !isNoteExpanded }
-                            ) {
-                                Text(
+                                text = stringResource(
                                     if (isNoteExpanded) {
-                                        "Show less"
+                                        R.string.details_show_less
                                     } else {
-                                        "Show more"
+                                        R.string.details_show_more
                                     }
                                 )
-                            }
+                            )
                         }
                     }
                 }
             }
 
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = stringResource(R.string.garden_details_history_title),
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        TextButton(
-                            onClick = { onViewAllHistory?.invoke() },
-                            enabled = onViewAllHistory != null
-                        ) {
-                            Text(stringResource(R.string.garden_details_history_view_all))
+            DetailsSectionCard(
+                title = stringResource(R.string.garden_details_history_title),
+                actionText = stringResource(R.string.garden_details_history_view_all),
+                onActionClick = onViewAllHistory
+            ) {
+                if (wateringEvents.isEmpty()) {
+                    Text(
+                        text = stringResource(R.string.garden_details_history_empty),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                } else {
+                    wateringEvents.forEachIndexed { index, event ->
+                        if (index > 0) {
+                            Spacer(modifier = Modifier.height(6.dp))
                         }
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    if (wateringEvents.isEmpty()) {
+                        val formattedDate = formatWateredDate(event.wateredAt)
                         Text(
-                            text = stringResource(R.string.garden_details_history_empty),
+                            text = stringResource(R.string.garden_details_history_item, formattedDate),
                             style = MaterialTheme.typography.bodyMedium
                         )
-                    } else {
-                        wateringEvents.forEachIndexed { index, event ->
-                            if (index > 0) {
-                                Spacer(modifier = Modifier.height(6.dp))
-                            }
-                            val formattedDate = formatWateredDate(event.wateredAt)
-                            Text(
-                                text = stringResource(R.string.garden_details_history_item, formattedDate),
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
                     }
                 }
             }
 
             if (onMarkWateredClick != null) {
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            text = stringResource(R.string.garden_details_section_actions),
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        OutlinedButton(onClick = onMarkWateredClick) {
-                            Text(stringResource(R.string.garden_details_mark_watered_now))
-                        }
+                DetailsSectionCard(
+                    title = stringResource(R.string.garden_details_section_actions)
+                ) {
+                    OutlinedButton(onClick = onMarkWateredClick) {
+                        Text(stringResource(R.string.garden_details_mark_watered_now))
                     }
                 }
             }
 
             if (onTestReminderIn5Seconds != null) {
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(text = stringResource(R.string.garden_details_section_reminder_test), style = MaterialTheme.typography.titleMedium)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        OutlinedButton(onClick = onTestReminderIn5Seconds) {
-                            Text(stringResource(R.string.garden_details_test_button))
-                        }
+                DetailsSectionCard(
+                    title = stringResource(R.string.garden_details_section_reminder_test)
+                ) {
+                    OutlinedButton(onClick = onTestReminderIn5Seconds) {
+                        Text(stringResource(R.string.garden_details_test_button))
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun PlantDetailsHero(
+    plant: MyPlantEntity
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(260.dp)
+            .clip(MaterialTheme.shapes.large)
+            .background(MaterialTheme.colorScheme.secondaryContainer)
+    ) {
+        if (!plant.imageUrl.isNullOrBlank()) {
+            AsyncImage(
+                model = plant.imageUrl,
+                contentDescription = stringResource(R.string.cd_plant_photo_format, plant.customName),
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+        } else {
+            Image(
+                painter = painterResource(id = R.drawable.flower_icon),
+                contentDescription = null,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .size(96.dp)
+                    .alpha(0.85f)
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            MaterialTheme.colorScheme.scrim.copy(alpha = 0.55f)
+                        )
+                    )
+                )
+        )
+
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(18.dp)
+        ) {
+            Text(
+                text = plant.customName,
+                style = MaterialTheme.typography.headlineSmall,
+                color = Color.White
+            )
+
+            if (plant.speciesName.isNotBlank()) {
+                Text(
+                    text = plant.speciesName,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.White.copy(alpha = 0.85f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun DetailsSectionCard(
+    title: String,
+    actionText: String? = null,
+    onActionClick: (() -> Unit)? = null,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+                if (actionText != null && onActionClick != null) {
+                    TextButton(onClick = onActionClick) {
+                        Text(actionText)
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            content()
         }
     }
 }

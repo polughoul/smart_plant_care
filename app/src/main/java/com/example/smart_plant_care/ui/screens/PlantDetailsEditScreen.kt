@@ -2,6 +2,7 @@ package com.example.smart_plant_care.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,6 +15,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -151,213 +154,221 @@ fun PlantDetailsEditScreen(
                 style = MaterialTheme.typography.titleMedium
             )
 
-            OutlinedTextField(
-                value = speciesName,
-                onValueChange = { speciesName = normalizeShortFieldInput(it) },
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text(stringResource(R.string.details_edit_label_species)) },
-                singleLine = true,
-                supportingText = {
-                    Text(
-                        stringResource(
-                            R.string.details_edit_counter_format,
-                            speciesName.length,
-                            SHORT_FIELD_MAX_LENGTH
+            EditFormSection(title = stringResource(R.string.details_edit_section_basic)) {
+                OutlinedTextField(
+                    value = speciesName,
+                    onValueChange = { speciesName = normalizeShortFieldInput(it) },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text(stringResource(R.string.details_edit_label_species)) },
+                    singleLine = true,
+                    supportingText = {
+                        Text(
+                            stringResource(
+                                R.string.details_edit_counter_format,
+                                speciesName.length,
+                                SHORT_FIELD_MAX_LENGTH
+                            )
                         )
-                    )
-                }
-            )
+                    }
+                )
 
-            OutlinedTextField(
-                value = scientificName,
-                onValueChange = { scientificName = normalizeShortFieldInput(it) },
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text(stringResource(R.string.details_edit_label_scientific_name)) },
-                singleLine = true,
-                supportingText = {
-                    Text(
-                        stringResource(
-                            R.string.details_edit_counter_format,
-                            scientificName.length,
-                            SHORT_FIELD_MAX_LENGTH
+                OutlinedTextField(
+                    value = scientificName,
+                    onValueChange = { scientificName = normalizeShortFieldInput(it) },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text(stringResource(R.string.details_edit_label_scientific_name)) },
+                    singleLine = true,
+                    supportingText = {
+                        Text(
+                            stringResource(
+                                R.string.details_edit_counter_format,
+                                scientificName.length,
+                                SHORT_FIELD_MAX_LENGTH
+                            )
                         )
-                    )
-                }
-            )
+                    }
+                )
 
-            OutlinedTextField(
-                value = family,
-                onValueChange = { family = normalizeShortFieldInput(it) },
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text(stringResource(R.string.details_edit_label_family)) },
-                singleLine = true,
-                supportingText = {
-                    Text(
-                        stringResource(
-                            R.string.details_edit_counter_format,
-                            family.length,
-                            SHORT_FIELD_MAX_LENGTH
+                OutlinedTextField(
+                    value = family,
+                    onValueChange = { family = normalizeShortFieldInput(it) },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text(stringResource(R.string.details_edit_label_family)) },
+                    singleLine = true,
+                    supportingText = {
+                        Text(
+                            stringResource(
+                                R.string.details_edit_counter_format,
+                                family.length,
+                                SHORT_FIELD_MAX_LENGTH
+                            )
                         )
-                    )
-                }
-            )
+                    }
+                )
 
-            OutlinedTextField(
-                value = plantType,
-                onValueChange = { plantType = normalizeShortFieldInput(it) },
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text(stringResource(R.string.details_edit_label_type)) },
-                singleLine = true,
-                supportingText = {
-                    Text(
-                        stringResource(
-                            R.string.details_edit_counter_format,
-                            plantType.length,
-                            SHORT_FIELD_MAX_LENGTH
+                OutlinedTextField(
+                    value = plantType,
+                    onValueChange = { plantType = normalizeShortFieldInput(it) },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text(stringResource(R.string.details_edit_label_type)) },
+                    singleLine = true,
+                    supportingText = {
+                        Text(
+                            stringResource(
+                                R.string.details_edit_counter_format,
+                                plantType.length,
+                                SHORT_FIELD_MAX_LENGTH
+                            )
                         )
-                    )
-                }
-            )
+                    }
+                )
+            }
 
-            OutlinedTextField(
-                value = origin,
-                onValueChange = { origin = normalizeShortFieldInput(it) },
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text(stringResource(R.string.details_edit_label_origin)) },
-                singleLine = true,
-                supportingText = {
-                    Text(
-                        stringResource(
-                            R.string.details_edit_counter_format,
-                            origin.length,
-                            SHORT_FIELD_MAX_LENGTH
+            EditFormSection(title = stringResource(R.string.details_edit_section_care)) {
+                OutlinedTextField(
+                    value = origin,
+                    onValueChange = { origin = normalizeShortFieldInput(it) },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text(stringResource(R.string.details_edit_label_origin)) },
+                    singleLine = true,
+                    supportingText = {
+                        Text(
+                            stringResource(
+                                R.string.details_edit_counter_format,
+                                origin.length,
+                                SHORT_FIELD_MAX_LENGTH
+                            )
                         )
-                    )
-                }
-            )
+                    }
+                )
 
-            OutlinedTextField(
-                value = sunlight,
-                onValueChange = { sunlight = normalizeShortFieldInput(it) },
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text(stringResource(R.string.details_edit_label_sunlight)) },
-                singleLine = true,
-                supportingText = {
-                    Text(
-                        stringResource(
-                            R.string.details_edit_counter_format,
-                            sunlight.length,
-                            SHORT_FIELD_MAX_LENGTH
+                OutlinedTextField(
+                    value = sunlight,
+                    onValueChange = { sunlight = normalizeShortFieldInput(it) },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text(stringResource(R.string.details_edit_label_sunlight)) },
+                    singleLine = true,
+                    supportingText = {
+                        Text(
+                            stringResource(
+                                R.string.details_edit_counter_format,
+                                sunlight.length,
+                                SHORT_FIELD_MAX_LENGTH
+                            )
                         )
-                    )
-                }
-            )
+                    }
+                )
 
-            OutlinedTextField(
-                value = attracts,
-                onValueChange = { attracts = normalizeShortFieldInput(it) },
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text(stringResource(R.string.details_edit_label_attracts)) },
-                singleLine = true,
-                supportingText = {
-                    Text(
-                        stringResource(
-                            R.string.details_edit_counter_format,
-                            attracts.length,
-                            SHORT_FIELD_MAX_LENGTH
+                OutlinedTextField(
+                    value = attracts,
+                    onValueChange = { attracts = normalizeShortFieldInput(it) },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text(stringResource(R.string.details_edit_label_attracts)) },
+                    singleLine = true,
+                    supportingText = {
+                        Text(
+                            stringResource(
+                                R.string.details_edit_counter_format,
+                                attracts.length,
+                                SHORT_FIELD_MAX_LENGTH
+                            )
                         )
-                    )
-                }
-            )
+                    }
+                )
+            }
 
-            OutlinedTextField(
-                value = fruitingSeason,
-                onValueChange = { fruitingSeason = normalizeShortFieldInput(it) },
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text(stringResource(R.string.details_edit_label_fruiting_season)) },
-                singleLine = true,
-                supportingText = {
-                    Text(
-                        stringResource(
-                            R.string.details_edit_counter_format,
-                            fruitingSeason.length,
-                            SHORT_FIELD_MAX_LENGTH
+            EditFormSection(title = stringResource(R.string.details_edit_section_harvest)) {
+                OutlinedTextField(
+                    value = fruitingSeason,
+                    onValueChange = { fruitingSeason = normalizeShortFieldInput(it) },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text(stringResource(R.string.details_edit_label_fruiting_season)) },
+                    singleLine = true,
+                    supportingText = {
+                        Text(
+                            stringResource(
+                                R.string.details_edit_counter_format,
+                                fruitingSeason.length,
+                                SHORT_FIELD_MAX_LENGTH
+                            )
                         )
-                    )
-                }
-            )
+                    }
+                )
 
-            OutlinedTextField(
-                value = harvestSeason,
-                onValueChange = { harvestSeason = normalizeShortFieldInput(it) },
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text(stringResource(R.string.details_edit_label_harvest_season)) },
-                singleLine = true,
-                supportingText = {
-                    Text(
-                        stringResource(
-                            R.string.details_edit_counter_format,
-                            harvestSeason.length,
-                            SHORT_FIELD_MAX_LENGTH
+                OutlinedTextField(
+                    value = harvestSeason,
+                    onValueChange = { harvestSeason = normalizeShortFieldInput(it) },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text(stringResource(R.string.details_edit_label_harvest_season)) },
+                    singleLine = true,
+                    supportingText = {
+                        Text(
+                            stringResource(
+                                R.string.details_edit_counter_format,
+                                harvestSeason.length,
+                                SHORT_FIELD_MAX_LENGTH
+                            )
                         )
-                    )
-                }
-            )
+                    }
+                )
 
-            OutlinedTextField(
-                value = harvestMethod,
-                onValueChange = { harvestMethod = normalizeShortFieldInput(it) },
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text(stringResource(R.string.details_edit_label_harvest_method)) },
-                singleLine = true,
-                supportingText = {
-                    Text(
-                        stringResource(
-                            R.string.details_edit_counter_format,
-                            harvestMethod.length,
-                            SHORT_FIELD_MAX_LENGTH
+                OutlinedTextField(
+                    value = harvestMethod,
+                    onValueChange = { harvestMethod = normalizeShortFieldInput(it) },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text(stringResource(R.string.details_edit_label_harvest_method)) },
+                    singleLine = true,
+                    supportingText = {
+                        Text(
+                            stringResource(
+                                R.string.details_edit_counter_format,
+                                harvestMethod.length,
+                                SHORT_FIELD_MAX_LENGTH
+                            )
                         )
-                    )
-                }
-            )
+                    }
+                )
+            }
 
-            OutlinedTextField(
-                value = description,
-                onValueChange = { description = normalizeLongFieldInput(it) },
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text(stringResource(R.string.details_edit_label_description)) },
-                minLines = 5,
-                maxLines = 10,
-                supportingText = {
-                    Text(
-                        stringResource(
-                            R.string.details_edit_counter_format,
-                            description.length,
-                            DESCRIPTION_MAX_LENGTH
+            EditFormSection(title = stringResource(R.string.details_edit_section_description)) {
+                OutlinedTextField(
+                    value = description,
+                    onValueChange = { description = normalizeLongFieldInput(it) },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text(stringResource(R.string.details_edit_label_description)) },
+                    minLines = 5,
+                    maxLines = 10,
+                    supportingText = {
+                        Text(
+                            stringResource(
+                                R.string.details_edit_counter_format,
+                                description.length,
+                                DESCRIPTION_MAX_LENGTH
+                            )
                         )
-                    )
-                }
-            )
+                    }
+                )
+            }
 
-            NullableBooleanSelector(
-                title = stringResource(R.string.details_edit_label_medicinal),
-                value = isMedicinal,
-                onValueChange = { isMedicinal = it }
-            )
+            EditFormSection(title = stringResource(R.string.details_edit_section_safety)) {
+                NullableBooleanSelector(
+                    title = stringResource(R.string.details_edit_label_medicinal),
+                    value = isMedicinal,
+                    onValueChange = { isMedicinal = it }
+                )
 
-            NullableBooleanSelector(
-                title = stringResource(R.string.details_edit_label_poisonous_humans),
-                value = isPoisonousToHumans,
-                onValueChange = { isPoisonousToHumans = it }
-            )
+                NullableBooleanSelector(
+                    title = stringResource(R.string.details_edit_label_poisonous_humans),
+                    value = isPoisonousToHumans,
+                    onValueChange = { isPoisonousToHumans = it }
+                )
 
-            NullableBooleanSelector(
-                title = stringResource(R.string.details_edit_label_poisonous_pets),
-                value = isPoisonousToPets,
-                onValueChange = { isPoisonousToPets = it }
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
+                NullableBooleanSelector(
+                    title = stringResource(R.string.details_edit_label_poisonous_pets),
+                    value = isPoisonousToPets,
+                    onValueChange = { isPoisonousToPets = it }
+                )
+            }
 
             Button(
                 modifier = Modifier.fillMaxWidth(),
@@ -436,3 +447,31 @@ private fun normalizeShortFieldInput(value: String): String {
 private fun normalizeLongFieldInput(value: String): String {
     return value.take(DESCRIPTION_MAX_LENGTH)
 }
+
+@Composable
+private fun EditFormSection(
+    title: String,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            content()
+        }
+    }
+}
+
