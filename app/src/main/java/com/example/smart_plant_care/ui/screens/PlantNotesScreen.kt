@@ -51,7 +51,7 @@ fun PlantNotesScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text("Notes")
+                    Text(stringResource(R.string.notes_screen_title))
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
@@ -70,7 +70,7 @@ fun PlantNotesScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Check,
-                            contentDescription = "Save notes"
+                            contentDescription = stringResource(R.string.notes_screen_save_cd)
                         )
                     }
                 }
@@ -107,11 +107,17 @@ fun PlantNotesScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
-                label = { Text("Note") },
-                placeholder = { Text("Write your note here") },
+                label = { Text(stringResource(R.string.notes_screen_label)) },
+                placeholder = { Text(stringResource(R.string.notes_screen_placeholder)) },
                 minLines = 10,
                 supportingText = {
-                    Text("${noteText.length}/$NOTE_MAX_LENGTH")
+                    Text(
+                        stringResource(
+                            R.string.notes_screen_counter_format,
+                            noteText.length,
+                            NOTE_MAX_LENGTH
+                        )
+                    )
                 }
             )
 
@@ -121,10 +127,9 @@ fun PlantNotesScreen(
                 onClick = {
                     onSaveClick(noteText.trim().ifBlank { null })
                 },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = plant != null
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Save")
+                Text(stringResource(R.string.common_save))
             }
         }
     }

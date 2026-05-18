@@ -26,6 +26,10 @@ class PlantRemoteRepository(
     suspend fun searchPlants(query: String, apiKey: String): RemoteResult<List<ApiPlantDto>> {
         return runCatching {
             val plants = apiService.searchPlants(query = query, apiKey = apiKey).data
+                .filter { plant ->
+                    plant.id in 1..3000
+                }
+
             RemoteResult.Success(plants)
         }.getOrElse { exception ->
             RemoteResult.Error(mapRemoteError(exception))
@@ -64,7 +68,7 @@ class PlantRemoteRepository(
             is HttpException -> when (exception.code()) {
                 401, 403 -> "API key is invalid or unauthorized. Check PERENUAL_API_KEY in local.properties."
                 404 -> "Plant API endpoint not found (HTTP 404)."
-                429 -> "API rate limit reached. Wait a minute and retry."
+                429 -> "This plant may be unavailable on the current API plan, or the daily request limit was reached."
                 in 500..599 -> "Plant API temporary server error (${exception.code()}). Try again later."
                 else -> "Plant API request failed (HTTP ${exception.code()})."
             }

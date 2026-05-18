@@ -84,11 +84,13 @@ fun WateringHistoryScreen(
         }
     }
 
+    val datePattern = stringResource(R.string.watering_history_date_format)
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Text("Watering history")
+                    Text(stringResource(R.string.garden_details_history_title))
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
@@ -139,7 +141,7 @@ fun WateringHistoryScreen(
                             selectedFilter = WateringHistoryFilter.ALL
                         },
                         label = {
-                            Text("All")
+                            Text(stringResource(R.string.watering_history_filter_all))
                         }
                     )
 
@@ -149,7 +151,7 @@ fun WateringHistoryScreen(
                             selectedFilter = WateringHistoryFilter.THIS_MONTH
                         },
                         label = {
-                            Text("This month")
+                            Text(stringResource(R.string.watering_history_filter_month))
                         }
                     )
 
@@ -159,7 +161,7 @@ fun WateringHistoryScreen(
                             selectedFilter = WateringHistoryFilter.THIS_YEAR
                         },
                         label = {
-                            Text("This year")
+                            Text(stringResource(R.string.watering_history_filter_year))
                         }
                     )
                 }
@@ -185,7 +187,7 @@ fun WateringHistoryScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "No watering records for this filter",
+                        text = stringResource(R.string.watering_history_empty_filter),
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
@@ -206,7 +208,7 @@ fun WateringHistoryScreen(
                         Card(modifier = Modifier.fillMaxWidth()) {
                             Column(modifier = Modifier.padding(16.dp)) {
                                 Text(
-                                    text = formatWateringHistoryDate(event.wateredAt),
+                                    text = formatWateringHistoryDate(event.wateredAt, datePattern),
                                     style = MaterialTheme.typography.bodyLarge
                                 )
                             }
@@ -218,13 +220,13 @@ fun WateringHistoryScreen(
     }
 }
 
-private fun formatWateringHistoryDate(epochMillis: Long): String {
+private fun formatWateringHistoryDate(epochMillis: Long, pattern: String): String {
     val dateTime = Instant
         .ofEpochMilli(epochMillis)
         .atZone(ZoneId.systemDefault())
 
     val formatter = DateTimeFormatter.ofPattern(
-        "d MMM yyyy, HH:mm",
+        pattern,
         Locale.getDefault()
     )
 

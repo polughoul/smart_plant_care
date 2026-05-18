@@ -83,7 +83,7 @@ fun PlantDetailsEditScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Edit details") },
+                title = { Text(stringResource(R.string.details_edit_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(
@@ -120,7 +120,7 @@ fun PlantDetailsEditScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Check,
-                            contentDescription = "Save details"
+                            contentDescription = stringResource(R.string.details_edit_cd_save)
                         )
                     }
                 }
@@ -155,10 +155,16 @@ fun PlantDetailsEditScreen(
                 value = speciesName,
                 onValueChange = { speciesName = normalizeShortFieldInput(it) },
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text("Species") },
+                label = { Text(stringResource(R.string.details_edit_label_species)) },
                 singleLine = true,
                 supportingText = {
-                    Text("${speciesName.length}/$SHORT_FIELD_MAX_LENGTH")
+                    Text(
+                        stringResource(
+                            R.string.details_edit_counter_format,
+                            speciesName.length,
+                            SHORT_FIELD_MAX_LENGTH
+                        )
+                    )
                 }
             )
 
@@ -166,10 +172,16 @@ fun PlantDetailsEditScreen(
                 value = scientificName,
                 onValueChange = { scientificName = normalizeShortFieldInput(it) },
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text("Scientific name") },
+                label = { Text(stringResource(R.string.details_edit_label_scientific_name)) },
                 singleLine = true,
                 supportingText = {
-                    Text("${scientificName.length}/$SHORT_FIELD_MAX_LENGTH")
+                    Text(
+                        stringResource(
+                            R.string.details_edit_counter_format,
+                            scientificName.length,
+                            SHORT_FIELD_MAX_LENGTH
+                        )
+                    )
                 }
             )
 
@@ -177,10 +189,16 @@ fun PlantDetailsEditScreen(
                 value = family,
                 onValueChange = { family = normalizeShortFieldInput(it) },
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text("Family") },
+                label = { Text(stringResource(R.string.details_edit_label_family)) },
                 singleLine = true,
                 supportingText = {
-                    Text("${family.length}/$SHORT_FIELD_MAX_LENGTH")
+                    Text(
+                        stringResource(
+                            R.string.details_edit_counter_format,
+                            family.length,
+                            SHORT_FIELD_MAX_LENGTH
+                        )
+                    )
                 }
             )
 
@@ -188,10 +206,16 @@ fun PlantDetailsEditScreen(
                 value = plantType,
                 onValueChange = { plantType = normalizeShortFieldInput(it) },
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text("Type") },
+                label = { Text(stringResource(R.string.details_edit_label_type)) },
                 singleLine = true,
                 supportingText = {
-                    Text("${plantType.length}/$SHORT_FIELD_MAX_LENGTH")
+                    Text(
+                        stringResource(
+                            R.string.details_edit_counter_format,
+                            plantType.length,
+                            SHORT_FIELD_MAX_LENGTH
+                        )
+                    )
                 }
             )
 
@@ -199,10 +223,16 @@ fun PlantDetailsEditScreen(
                 value = origin,
                 onValueChange = { origin = normalizeShortFieldInput(it) },
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text("Origin") },
+                label = { Text(stringResource(R.string.details_edit_label_origin)) },
                 singleLine = true,
                 supportingText = {
-                    Text("${origin.length}/$SHORT_FIELD_MAX_LENGTH")
+                    Text(
+                        stringResource(
+                            R.string.details_edit_counter_format,
+                            origin.length,
+                            SHORT_FIELD_MAX_LENGTH
+                        )
+                    )
                 }
             )
 
@@ -210,10 +240,16 @@ fun PlantDetailsEditScreen(
                 value = sunlight,
                 onValueChange = { sunlight = normalizeShortFieldInput(it) },
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text("Sunlight") },
+                label = { Text(stringResource(R.string.details_edit_label_sunlight)) },
                 singleLine = true,
                 supportingText = {
-                    Text("${sunlight.length}/$SHORT_FIELD_MAX_LENGTH")
+                    Text(
+                        stringResource(
+                            R.string.details_edit_counter_format,
+                            sunlight.length,
+                            SHORT_FIELD_MAX_LENGTH
+                        )
+                    )
                 }
             )
 
@@ -221,10 +257,16 @@ fun PlantDetailsEditScreen(
                 value = attracts,
                 onValueChange = { attracts = normalizeShortFieldInput(it) },
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text("Attracts") },
+                label = { Text(stringResource(R.string.details_edit_label_attracts)) },
                 singleLine = true,
                 supportingText = {
-                    Text("${attracts.length}/$SHORT_FIELD_MAX_LENGTH")
+                    Text(
+                        stringResource(
+                            R.string.details_edit_counter_format,
+                            attracts.length,
+                            SHORT_FIELD_MAX_LENGTH
+                        )
+                    )
                 }
             )
 
@@ -232,10 +274,16 @@ fun PlantDetailsEditScreen(
                 value = fruitingSeason,
                 onValueChange = { fruitingSeason = normalizeShortFieldInput(it) },
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text("Fruiting season") },
+                label = { Text(stringResource(R.string.details_edit_label_fruiting_season)) },
                 singleLine = true,
                 supportingText = {
-                    Text("${fruitingSeason.length}/$SHORT_FIELD_MAX_LENGTH")
+                    Text(
+                        stringResource(
+                            R.string.details_edit_counter_format,
+                            fruitingSeason.length,
+                            SHORT_FIELD_MAX_LENGTH
+                        )
+                    )
                 }
             )
 
@@ -243,10 +291,16 @@ fun PlantDetailsEditScreen(
                 value = harvestSeason,
                 onValueChange = { harvestSeason = normalizeShortFieldInput(it) },
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text("Harvest season") },
+                label = { Text(stringResource(R.string.details_edit_label_harvest_season)) },
                 singleLine = true,
                 supportingText = {
-                    Text("${harvestSeason.length}/$SHORT_FIELD_MAX_LENGTH")
+                    Text(
+                        stringResource(
+                            R.string.details_edit_counter_format,
+                            harvestSeason.length,
+                            SHORT_FIELD_MAX_LENGTH
+                        )
+                    )
                 }
             )
 
@@ -254,10 +308,16 @@ fun PlantDetailsEditScreen(
                 value = harvestMethod,
                 onValueChange = { harvestMethod = normalizeShortFieldInput(it) },
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text("Harvest method") },
+                label = { Text(stringResource(R.string.details_edit_label_harvest_method)) },
                 singleLine = true,
                 supportingText = {
-                    Text("${harvestMethod.length}/$SHORT_FIELD_MAX_LENGTH")
+                    Text(
+                        stringResource(
+                            R.string.details_edit_counter_format,
+                            harvestMethod.length,
+                            SHORT_FIELD_MAX_LENGTH
+                        )
+                    )
                 }
             )
 
@@ -265,28 +325,34 @@ fun PlantDetailsEditScreen(
                 value = description,
                 onValueChange = { description = normalizeLongFieldInput(it) },
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text("Description") },
+                label = { Text(stringResource(R.string.details_edit_label_description)) },
                 minLines = 5,
                 maxLines = 10,
                 supportingText = {
-                    Text("${description.length}/$DESCRIPTION_MAX_LENGTH")
+                    Text(
+                        stringResource(
+                            R.string.details_edit_counter_format,
+                            description.length,
+                            DESCRIPTION_MAX_LENGTH
+                        )
+                    )
                 }
             )
 
             NullableBooleanSelector(
-                title = "Medicinal",
+                title = stringResource(R.string.details_edit_label_medicinal),
                 value = isMedicinal,
                 onValueChange = { isMedicinal = it }
             )
 
             NullableBooleanSelector(
-                title = "Poisonous to humans",
+                title = stringResource(R.string.details_edit_label_poisonous_humans),
                 value = isPoisonousToHumans,
                 onValueChange = { isPoisonousToHumans = it }
             )
 
             NullableBooleanSelector(
-                title = "Poisonous to pets",
+                title = stringResource(R.string.details_edit_label_poisonous_pets),
                 value = isPoisonousToPets,
                 onValueChange = { isPoisonousToPets = it }
             )
@@ -316,7 +382,7 @@ fun PlantDetailsEditScreen(
                     )
                 }
             ) {
-                Text("Save")
+                Text(stringResource(R.string.common_save))
             }
         }
     }
@@ -342,19 +408,19 @@ private fun NullableBooleanSelector(
             FilterChip(
                 selected = value == null,
                 onClick = { onValueChange(null) },
-                label = { Text("Unknown") }
+                label = { Text(stringResource(R.string.details_unknown)) }
             )
 
             FilterChip(
                 selected = value == true,
                 onClick = { onValueChange(true) },
-                label = { Text("Yes") }
+                label = { Text(stringResource(R.string.common_yes)) }
             )
 
             FilterChip(
                 selected = value == false,
                 onClick = { onValueChange(false) },
-                label = { Text("No") }
+                label = { Text(stringResource(R.string.common_no)) }
             )
         }
     }

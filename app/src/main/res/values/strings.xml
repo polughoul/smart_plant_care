@@ -17,6 +17,7 @@
     <string name="common_no">No</string>
     <string name="common_cd_back">Back</string>
     <string name="common_cd_add">Add</string>
+    <string name="common_save">Save</string>
 
     <string name="nav_my_garden">My Garden</string>
     <string name="nav_settings">Settings</string>
@@ -162,4 +163,34 @@
     <string name="garden_details_history_view_all">View all</string>
     <string name="garden_details_history_empty">No watering history yet</string>
     <string name="garden_details_history_item">Watered on %1$s</string>
+
+    <string name="notes_screen_title">Notes</string>
+    <string name="notes_screen_label">Note</string>
+    <string name="notes_screen_placeholder">Write your note here</string>
+    <string name="notes_screen_save_cd">Save notes</string>
+    <string name="notes_screen_counter_format">%1$d/%2$d</string>
+
+    <string name="watering_history_filter_all">All</string>
+    <string name="watering_history_filter_month">This month</string>
+    <string name="watering_history_filter_year">This year</string>
+    <string name="watering_history_empty_filter">No watering records for this filter</string>
+    <string name="watering_history_date_format">d MMM yyyy, HH:mm</string>
+
+    <string name="details_edit_title">Edit details</string>
+    <string name="details_edit_cd_save">Save details</string>
+    <string name="details_edit_label_species">Species</string>
+    <string name="details_edit_label_scientific_name">Scientific name</string>
+    <string name="details_edit_label_family">Family</string>
+    <string name="details_edit_label_type">Type</string>
+    <string name="details_edit_label_origin">Origin</string>
+    <string name="details_edit_label_sunlight">Sunlight</string>
+    <string name="details_edit_label_attracts">Attracts</string>
+    <string name="details_edit_label_fruiting_season">Fruiting season</string>
+    <string name="details_edit_label_harvest_season">Harvest season</string>
+    <string name="details_edit_label_harvest_method">Harvest method</string>
+    <string name="details_edit_label_description">Description</string>
+    <string name="details_edit_label_medicinal">Medicinal</string>
+    <string name="details_edit_label_poisonous_humans">Poisonous to humans</string>
+    <string name="details_edit_label_poisonous_pets">Poisonous to pets</string>
+    <string name="details_edit_counter_format">%1$d/%2$d</string>
 </resources>
