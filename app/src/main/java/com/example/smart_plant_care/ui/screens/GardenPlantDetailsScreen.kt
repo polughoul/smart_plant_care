@@ -41,6 +41,11 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import androidx.compose.material3.TextButton
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,6 +56,7 @@ fun GardenPlantDetailsScreen(
     onMarkWateredClick: (() -> Unit)? = null,
     onTestReminderIn5Seconds: (() -> Unit)? = null,
     onOpenNotes: (() -> Unit)? = null,
+    onEditDetails: (() -> Unit)? = null,
     onViewAllHistory: (() -> Unit)? = null
 ) {
     Scaffold(
@@ -82,36 +88,73 @@ fun GardenPlantDetailsScreen(
             return@Scaffold
         }
 
+        var isNoteExpanded by remember(plant.id, plant.noteText) {
+            mutableStateOf(false)
+        }
+
         val yesLabel = stringResource(R.string.common_yes)
         val noLabel = stringResource(R.string.common_no)
+
         val wateringIntervalFact = pluralStringResource(
             R.plurals.fact_water_every_days,
             plant.waterIntervalDays,
             plant.waterIntervalDays
         )
+
         val facts = buildList {
-            add(stringResource(R.string.fact_species_format, plant.speciesName))
+            plant.speciesName.takeIf { it.isNotBlank() }?.let {
+                add(stringResource(R.string.fact_species_format, it))
+            }
+
             plant.scientificName?.takeIf { it.isNotBlank() }?.let {
                 add(stringResource(R.string.fact_scientific_name_format, it))
             }
-            plant.family?.takeIf { it.isNotBlank() }?.let { add(stringResource(R.string.fact_family_format, it)) }
-            plant.plantType?.takeIf { it.isNotBlank() }?.let { add(stringResource(R.string.fact_type_format, it)) }
-            plant.origin?.takeIf { it.isNotBlank() }?.let { add(stringResource(R.string.fact_origin_format, it)) }
-            plant.sunlight?.takeIf { it.isNotBlank() }?.let { add(stringResource(R.string.fact_sunlight_format, it)) }
-            plant.attracts?.takeIf { it.isNotBlank() }?.let { add(stringResource(R.string.fact_attracts_format, it)) }
+
+            plant.family?.takeIf { it.isNotBlank() }?.let {
+                add(stringResource(R.string.fact_family_format, it))
+            }
+
+            plant.plantType?.takeIf { it.isNotBlank() }?.let {
+                add(stringResource(R.string.fact_type_format, it))
+            }
+
+            plant.origin?.takeIf { it.isNotBlank() }?.let {
+                add(stringResource(R.string.fact_origin_format, it))
+            }
+
+            plant.sunlight?.takeIf { it.isNotBlank() }?.let {
+                add(stringResource(R.string.fact_sunlight_format, it))
+            }
+
+            plant.attracts?.takeIf { it.isNotBlank() }?.let {
+                add(stringResource(R.string.fact_attracts_format, it))
+            }
+
             plant.fruitingSeason?.takeIf { it.isNotBlank() }?.let {
                 add(stringResource(R.string.fact_fruiting_season_format, it))
             }
+
             plant.harvestSeason?.takeIf { it.isNotBlank() }?.let {
                 add(stringResource(R.string.fact_harvest_season_format, it))
             }
+
             plant.harvestMethod?.takeIf { it.isNotBlank() }?.let {
                 add(stringResource(R.string.fact_harvest_method_format, it))
             }
+
             add(wateringIntervalFact)
-            add(stringResource(R.string.fact_medicinal_format, if (plant.isMedicinal) yesLabel else noLabel))
-            add(stringResource(R.string.fact_poisonous_humans_format, if (plant.isPoisonousToHumans) yesLabel else noLabel))
-            add(stringResource(R.string.fact_poisonous_pets_format, if (plant.isPoisonousToPets) yesLabel else noLabel))
+
+            plant.isMedicinal?.let {
+                add(stringResource(R.string.fact_medicinal_format, if (it) yesLabel else noLabel))
+            }
+
+            plant.isPoisonousToHumans?.let {
+                add(stringResource(R.string.fact_poisonous_humans_format, if (it) yesLabel else noLabel))
+            }
+
+            plant.isPoisonousToPets?.let {
+                add(stringResource(R.string.fact_poisonous_pets_format, if (it) yesLabel else noLabel))
+            }
         }
 
         Column(
@@ -141,28 +184,68 @@ fun GardenPlantDetailsScreen(
 
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text(text = stringResource(R.string.garden_details_section_details), style = MaterialTheme.typography.titleMedium)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(R.string.garden_details_section_details),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+
+                        TextButton(
+                            onClick = { onEditDetails?.invoke() },
+                            enabled = onEditDetails != null
+                        ) {
+                            Text("Edit")
+                        }
+                    }
+
                     Spacer(modifier = Modifier.height(8.dp))
+
                     facts.forEachIndexed { index, fact ->
                         if (index > 0) {
                             Spacer(modifier = Modifier.height(6.dp))
                         }
-                        Text(text = fact, style = MaterialTheme.typography.bodyMedium)
+                        Text(
+                            text = fact,
+                            style = MaterialTheme.typography.bodyMedium,
+                            maxLines = 3,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     }
                 }
             }
 
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = stringResource(R.string.details_description),
-                        style = MaterialTheme.typography.titleMedium
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(R.string.details_description),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+
+                        TextButton(
+                            onClick = { onEditDetails?.invoke() },
+                            enabled = onEditDetails != null
+                        ) {
+                            Text("Edit")
+                        }
+                    }
+
                     Spacer(modifier = Modifier.height(8.dp))
+
                     Text(
                         text = plant.description?.takeIf { it.isNotBlank() }
                             ?: stringResource(R.string.details_no_description),
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium,
+                        maxLines = 6,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }
@@ -195,12 +278,37 @@ fun GardenPlantDetailsScreen(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    Text(
-                        text = plant.noteText?.takeIf { it.isNotBlank() } ?: "No notes yet",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 3
-                    )
+                    val noteText = plant.noteText?.takeIf { it.isNotBlank() }
+
+                    if (noteText == null) {
+                        Text(
+                            text = "No notes yet",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    } else {
+                        Text(
+                            text = noteText,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = if (isNoteExpanded) Int.MAX_VALUE else 4,
+                            overflow = TextOverflow.Ellipsis
+                        )
+
+                        if (noteText.length > 160 || noteText.lines().size > 4) {
+                            TextButton(
+                                onClick = { isNoteExpanded = !isNoteExpanded }
+                            ) {
+                                Text(
+                                    if (isNoteExpanded) {
+                                        "Show less"
+                                    } else {
+                                        "Show more"
+                                    }
+                                )
+                            }
+                        }
+                    }
                 }
             }
 

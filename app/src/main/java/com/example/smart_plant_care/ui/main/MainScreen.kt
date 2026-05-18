@@ -48,6 +48,7 @@ import com.example.smart_plant_care.ui.screens.DetailsScreen
 import com.example.smart_plant_care.ui.viewmodels.SettingsViewModel
 import com.example.smart_plant_care.ui.screens.PlantNotesScreen
 import com.example.smart_plant_care.ui.screens.WateringHistoryScreen
+import com.example.smart_plant_care.ui.screens.PlantDetailsEditScreen
 import java.net.URLDecoder.decode
 import kotlinx.coroutines.launch
 
@@ -200,9 +201,9 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
                             fruitingSeason = detailsDto.fruitingSeason,
                             harvestSeason = detailsDto.harvestSeason,
                             harvestMethod = detailsDto.harvestMethod,
-                            isMedicinal = detailsDto.medicinal ?: false,
-                            isPoisonousToHumans = detailsDto.poisonousToHumans ?: false,
-                            isPoisonousToPets = detailsDto.poisonousToPets ?: false,
+                            isMedicinal = detailsDto.medicinal,
+                            isPoisonousToHumans = detailsDto.poisonousToHumans,
+                            isPoisonousToPets = detailsDto.poisonousToPets,
                             imageUrl = detailsDto.defaultImage?.regularUrl ?: detailsDto.defaultImage?.thumbnail
                         )
                         gardenViewModel.insertPlant(newPlant) { result ->
@@ -255,7 +256,7 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
                     onSaveClick = { customName, waterDays, imageUrl ->
                         val newPlant = MyPlantEntity(
                             customName = customName,
-                            speciesName = speciesName,
+                            speciesName = if (speciesName == MANUAL_ENTRY_SPECIES_TOKEN) customName else speciesName,
                             scientificName = sharedPlantDetails?.scientificName?.firstOrNull(),
                             family = sharedPlantDetails?.family,
                             origin = sharedPlantDetails?.origin?.joinToString(),
@@ -268,9 +269,9 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
                             fruitingSeason = sharedPlantDetails?.fruitingSeason,
                             harvestSeason = sharedPlantDetails?.harvestSeason,
                             harvestMethod = sharedPlantDetails?.harvestMethod,
-                            isMedicinal = sharedPlantDetails?.medicinal ?: false,
-                            isPoisonousToHumans = sharedPlantDetails?.poisonousToHumans ?: false,
-                            isPoisonousToPets = sharedPlantDetails?.poisonousToPets ?: false,
+                            isMedicinal = sharedPlantDetails?.medicinal,
+                            isPoisonousToHumans = sharedPlantDetails?.poisonousToHumans,
+                            isPoisonousToPets = sharedPlantDetails?.poisonousToPets,
                             imageUrl = imageUrl
                         )
                         gardenViewModel.insertPlant(newPlant)
@@ -366,6 +367,11 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
                             navController.navigate(Screen.PlantNotes.createRoute(selectedPlant.id))
                         }
                     },
+                    onEditDetails = plant?.let { selectedPlant ->
+                        {
+                            navController.navigate(Screen.PlantDetailsEdit.createRoute(selectedPlant.id))
+                        }
+                    },
                     onViewAllHistory = plant?.let { selectedPlant ->
                         {
                             navController.navigate(Screen.WateringHistory.createRoute(selectedPlant.id))
@@ -397,6 +403,20 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
 
                             navController.popBackStack()
                         }
+                    }
+                )
+            }
+            composable(Screen.PlantDetailsEdit.route) { backStackEntry ->
+                val plantId = backStackEntry.arguments?.getString("plantId")?.toIntOrNull() ?: 0
+                val plants by gardenViewModel.plantsList.collectAsState()
+                val plant = plants.firstOrNull { it.id == plantId }
+
+                PlantDetailsEditScreen(
+                    plant = plant,
+                    onBackClick = { navController.popBackStack() },
+                    onSaveClick = { updatedPlant ->
+                        gardenViewModel.updatePlant(updatedPlant)
+                        navController.popBackStack()
                     }
                 )
             }

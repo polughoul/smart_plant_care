@@ -10,7 +10,7 @@ import com.example.smart_plant_care.data.local.entity.MyPlantEntity
 import com.example.smart_plant_care.data.local.entity.WateringEventEntity
 
 
-@Database(entities = [MyPlantEntity::class, WateringEventEntity::class], version = 8, exportSchema = false)
+@Database(entities = [MyPlantEntity::class, WateringEventEntity::class], version = 9, exportSchema = false)
 abstract class AppDatabase: RoomDatabase() {
     abstract fun plantDao(): PlantDao
     abstract fun wateringEventDao(): WateringEventDao

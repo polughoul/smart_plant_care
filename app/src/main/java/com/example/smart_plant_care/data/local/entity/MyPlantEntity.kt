@@ -27,9 +27,9 @@ data class MyPlantEntity(
     val fruitingSeason: String? = null,
     val harvestSeason: String? = null,
     val harvestMethod: String? = null,
-    val isMedicinal: Boolean = false,
-    val isPoisonousToHumans: Boolean = false,
-    val isPoisonousToPets: Boolean = false,
+    val isMedicinal: Boolean? = null,
+    val isPoisonousToHumans: Boolean? = null,
+    val isPoisonousToPets: Boolean? = null,
     val noteText: String? = null,
     val imageUrl: String? = null
 )

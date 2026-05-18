@@ -30,6 +30,8 @@ import androidx.compose.ui.unit.dp
 import com.example.smart_plant_care.R
 import com.example.smart_plant_care.data.local.entity.MyPlantEntity
 
+
+private const val NOTE_MAX_LENGTH = 2000
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlantNotesScreen(
@@ -101,13 +103,16 @@ fun PlantNotesScreen(
 
             OutlinedTextField(
                 value = noteText,
-                onValueChange = { noteText = it },
+                onValueChange = { noteText = normalizeNoteInput(it) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
                 label = { Text("Note") },
                 placeholder = { Text("Write your note here") },
-                minLines = 10
+                minLines = 10,
+                supportingText = {
+                    Text("${noteText.length}/$NOTE_MAX_LENGTH")
+                }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -123,4 +128,8 @@ fun PlantNotesScreen(
             }
         }
     }
+}
+
+private fun normalizeNoteInput(value: String): String {
+    return value.take(NOTE_MAX_LENGTH)
 }
