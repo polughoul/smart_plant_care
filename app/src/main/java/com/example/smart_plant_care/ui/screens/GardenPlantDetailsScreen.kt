@@ -104,6 +104,22 @@ fun GardenPlantDetailsScreen(
 
         val yesLabel = stringResource(R.string.common_yes)
         val noLabel = stringResource(R.string.common_no)
+        val pruningCountLabel = run {
+            val amount = plant.pruningCountAmount
+            val interval = plant.pruningCountInterval?.takeIf { it.isNotBlank() }
+            when {
+                amount != null && interval != null -> {
+                    stringResource(R.string.fact_pruning_count_format, amount, interval)
+                }
+                amount != null -> {
+                    stringResource(R.string.fact_pruning_count_amount_format, amount)
+                }
+                interval != null -> {
+                    stringResource(R.string.fact_pruning_count_interval_format, interval)
+                }
+                else -> null
+            }
+        }
 
         val wateringIntervalFact = pluralStringResource(
             R.plurals.fact_water_every_days,
@@ -140,16 +156,24 @@ fun GardenPlantDetailsScreen(
                 add(stringResource(R.string.fact_attracts_format, it))
             }
 
-            plant.fruitingSeason?.takeIf { it.isNotBlank() }?.let {
-                add(stringResource(R.string.fact_fruiting_season_format, it))
+            plant.pruningMonths?.takeIf { it.isNotBlank() }?.let {
+                add(stringResource(R.string.fact_pruning_months_format, it))
             }
 
-            plant.harvestSeason?.takeIf { it.isNotBlank() }?.let {
-                add(stringResource(R.string.fact_harvest_season_format, it))
+            pruningCountLabel?.let {
+                add(it)
             }
 
-            plant.harvestMethod?.takeIf { it.isNotBlank() }?.let {
-                add(stringResource(R.string.fact_harvest_method_format, it))
+            plant.growthRate?.takeIf { it.isNotBlank() }?.let {
+                add(stringResource(R.string.fact_growth_rate_format, it))
+            }
+
+            plant.soil?.takeIf { it.isNotBlank() }?.let {
+                add(stringResource(R.string.fact_soil_format, it))
+            }
+
+            plant.rare?.let {
+                add(stringResource(R.string.fact_rare_format, if (it) yesLabel else noLabel))
             }
 
             add(wateringIntervalFact)
@@ -226,6 +250,16 @@ fun GardenPlantDetailsScreen(
                 }
             }
 
+            val careGuideSections = listOf(
+                stringResource(R.string.care_section_watering) to plant.careGuideWatering,
+                stringResource(R.string.care_section_sunlight) to plant.careGuideSunlight,
+                stringResource(R.string.care_section_pruning) to plant.careGuidePruning
+            ).filter { it.second?.isNotBlank() == true }
+
+            careGuideSections.forEach { (title, description) ->
+                CareGuideSectionCard(title = title, description = description.orEmpty())
+            }
+
             DetailsSectionCard(
                 title = stringResource(R.string.garden_details_notes_title),
                 actionText = stringResource(
@@ -294,6 +328,32 @@ fun GardenPlantDetailsScreen(
                         )
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun CareGuideSectionCard(title: String, description: String) {
+    var isExpanded by remember(title) { mutableStateOf(false) }
+    DetailsSectionCard(title = title) {
+        Text(
+            text = description,
+            style = MaterialTheme.typography.bodyMedium,
+            maxLines = if (isExpanded) Int.MAX_VALUE else 4,
+            overflow = TextOverflow.Ellipsis
+        )
+        if (description.length > 200 || description.lines().size > 4) {
+            TextButton(onClick = { isExpanded = !isExpanded }) {
+                Text(
+                    text = stringResource(
+                        if (isExpanded) {
+                            R.string.details_show_less
+                        } else {
+                            R.string.details_show_more
+                        }
+                    )
+                )
             }
         }
     }

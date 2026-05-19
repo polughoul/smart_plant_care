@@ -109,12 +109,24 @@
     <string name="fact_origin_format">Origin: %1$s</string>
     <string name="fact_sunlight_format">Sunlight: %1$s</string>
     <string name="fact_attracts_format">Attracts: %1$s</string>
+    <string name="fact_pruning_months_format">Pruning months: %1$s</string>
+    <string name="fact_pruning_count_format">Pruning count: %1$d %2$s</string>
+    <string name="fact_pruning_count_amount_format">Pruning count: %1$d</string>
+    <string name="fact_pruning_count_interval_format">Pruning count: %1$s</string>
+    <string name="fact_growth_rate_format">Growth rate: %1$s</string>
+    <string name="fact_soil_format">Soil: %1$s</string>
+    <string name="fact_rare_format">Rare: %1$s</string>
     <string name="fact_fruiting_season_format">Fruiting season: %1$s</string>
     <string name="fact_harvest_season_format">Harvest season: %1$s</string>
     <string name="fact_harvest_method_format">Harvest method: %1$s</string>
     <string name="fact_medicinal_format">Medicinal: %1$s</string>
     <string name="fact_poisonous_humans_format">Poisonous to humans: %1$s</string>
     <string name="fact_poisonous_pets_format">Poisonous to pets: %1$s</string>
+
+    <string name="care_section_watering">Watering</string>
+    <string name="care_section_sunlight">Sunlight</string>
+    <string name="care_section_pruning">Pruning</string>
+    <string name="care_section_generic">Care</string>
 
     <string name="details_title_loading">Loading…</string>
     <string name="details_title_default">Plant Details</string>
@@ -181,6 +193,12 @@
     <string name="details_edit_label_origin">Origin</string>
     <string name="details_edit_label_sunlight">Sunlight</string>
     <string name="details_edit_label_attracts">Attracts</string>
+    <string name="details_edit_label_pruning_months">Pruning months</string>
+    <string name="details_edit_label_pruning_count_amount">Pruning count (amount)</string>
+    <string name="details_edit_label_pruning_count_interval">Pruning count (interval)</string>
+    <string name="details_edit_label_growth_rate">Growth rate</string>
+    <string name="details_edit_label_soil">Soil</string>
+    <string name="details_edit_label_rare">Rare</string>
     <string name="details_edit_label_fruiting_season">Fruiting season</string>
     <string name="details_edit_label_harvest_season">Harvest season</string>
     <string name="details_edit_label_harvest_method">Harvest method</string>
@@ -188,6 +206,10 @@
     <string name="details_edit_label_medicinal">Medicinal</string>
     <string name="details_edit_label_poisonous_humans">Poisonous to humans</string>
     <string name="details_edit_label_poisonous_pets">Poisonous to pets</string>
+    <string name="details_edit_label_care_watering">Care: Watering</string>
+    <string name="details_edit_label_care_sunlight">Care: Sunlight</string>
+    <string name="details_edit_label_care_pruning">Care: Pruning</string>
+    <string name="details_edit_section_care_guide">Care guide</string>
     <string name="details_edit_counter_format">%1$d/%2$d</string>
     <string name="details_edit_section_basic">Basic info</string>
     <string name="details_edit_section_care">Care &amp; environment</string>

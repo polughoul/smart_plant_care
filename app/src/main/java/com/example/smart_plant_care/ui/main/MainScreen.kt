@@ -49,6 +49,7 @@ import com.example.smart_plant_care.ui.viewmodels.SettingsViewModel
 import com.example.smart_plant_care.ui.screens.PlantNotesScreen
 import com.example.smart_plant_care.ui.screens.WateringHistoryScreen
 import com.example.smart_plant_care.ui.screens.PlantDetailsEditScreen
+import com.example.smart_plant_care.data.remote.dto.bestImageUrl
 import java.net.URLDecoder.decode
 import kotlinx.coroutines.launch
 
@@ -184,7 +185,19 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
                 DetailsScreen(
                     plantId = plantId,
                     onBackClick = { navController.popBackStack() },
-                    onAddClick = { detailsDto, defaultWaterDays ->
+                    onAddClick = { detailsDto, defaultWaterDays, careSections ->
+                        val careGuideWatering = careSections
+                            .firstOrNull { it.type.equals("watering", ignoreCase = true) }
+                            ?.description
+                            ?.takeIf { it.isNotBlank() }
+                        val careGuideSunlight = careSections
+                            .firstOrNull { it.type.equals("sunlight", ignoreCase = true) }
+                            ?.description
+                            ?.takeIf { it.isNotBlank() }
+                        val careGuidePruning = careSections
+                            .firstOrNull { it.type.equals("pruning", ignoreCase = true) }
+                            ?.description
+                            ?.takeIf { it.isNotBlank() }
                         val newPlant = MyPlantEntity(
                             customName = detailsDto.commonName,
                             speciesName = detailsDto.commonName,
@@ -195,6 +208,15 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
                             plantType = detailsDto.type,
                             sunlight = detailsDto.sunlight?.joinToString(),
                             attracts = detailsDto.attracts?.joinToString(),
+                            pruningMonths = detailsDto.pruningMonths?.joinToString(),
+                            pruningCountAmount = detailsDto.pruningCount?.amount,
+                            pruningCountInterval = detailsDto.pruningCount?.interval,
+                            growthRate = detailsDto.growthRate,
+                            soil = detailsDto.soil?.joinToString(),
+                            rare = detailsDto.rare,
+                            careGuideWatering = careGuideWatering,
+                            careGuideSunlight = careGuideSunlight,
+                            careGuidePruning = careGuidePruning,
                             description = detailsDto.description,
                             waterIntervalDays = defaultWaterDays,
                             nextWateringDate = System.currentTimeMillis() + (defaultWaterDays * 24L * 60 * 60 * 1000),
@@ -204,7 +226,7 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
                             isMedicinal = detailsDto.medicinal,
                             isPoisonousToHumans = detailsDto.poisonousToHumans,
                             isPoisonousToPets = detailsDto.poisonousToPets,
-                            imageUrl = detailsDto.defaultImage?.regularUrl ?: detailsDto.defaultImage?.thumbnail
+                            imageUrl = detailsDto.defaultImage.bestImageUrl()
                         )
                         gardenViewModel.insertPlant(newPlant) { result ->
                             when (result) {
@@ -250,8 +272,7 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
                 EditScreen(
                     speciesName = speciesName,
                     defaultWaterDays = defaultWaterDays,
-                    initialImageUrl = sharedPlantDetails?.defaultImage?.regularUrl
-                        ?: sharedPlantDetails?.defaultImage?.thumbnail,
+                    initialImageUrl = sharedPlantDetails?.defaultImage?.bestImageUrl(),
                     onBackClick = { navController.popBackStack() },
                     onSaveClick = { customName, waterDays, imageUrl ->
                         val newPlant = MyPlantEntity(
@@ -263,6 +284,12 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
                             plantType = sharedPlantDetails?.type,
                             sunlight = sharedPlantDetails?.sunlight?.joinToString(),
                             attracts = sharedPlantDetails?.attracts?.joinToString(),
+                            pruningMonths = sharedPlantDetails?.pruningMonths?.joinToString(),
+                            pruningCountAmount = sharedPlantDetails?.pruningCount?.amount,
+                            pruningCountInterval = sharedPlantDetails?.pruningCount?.interval,
+                            growthRate = sharedPlantDetails?.growthRate,
+                            soil = sharedPlantDetails?.soil?.joinToString(),
+                            rare = sharedPlantDetails?.rare,
                             description = sharedPlantDetails?.description,
                             waterIntervalDays = waterDays,
                             nextWateringDate = System.currentTimeMillis() + (waterDays * 24L * 60 * 60 * 1000),
@@ -324,7 +351,7 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
                             navController.navigate(Screen.PlantNotes.createRoute(selectedPlant.id))
                         }
                     },
-                    onEditDetails = plant?.let { selectedPlant ->
+                    onEditDetails = plant?.takeIf { it.remotePlantId == null }?.let { selectedPlant ->
                         {
                             navController.navigate(Screen.PlantDetailsEdit.createRoute(selectedPlant.id))
                         }

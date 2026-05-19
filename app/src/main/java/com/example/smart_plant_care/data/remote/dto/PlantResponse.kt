@@ -31,8 +31,19 @@ data class ApiPlantDto(
 
 data class PlantImage(
     @SerializedName("thumbnail") val thumbnail: String?,
-    @SerializedName("regular_url") val regularUrl: String?
+    @SerializedName("small_url") val smallUrl: String?,
+    @SerializedName("medium_url") val mediumUrl: String?,
+    @SerializedName("regular_url") val regularUrl: String?,
+    @SerializedName("original_url") val originalUrl: String?
 )
+
+fun PlantImage?.bestImageUrl(): String? {
+    return this?.regularUrl
+        ?: this?.mediumUrl
+        ?: this?.smallUrl
+        ?: this?.thumbnail
+        ?: this?.originalUrl
+}
 
 data class PlantDetailsDto(
     @SerializedName("id") val id: Int,
@@ -52,7 +63,17 @@ data class PlantDetailsDto(
     @SerializedName("medicinal") val medicinal: Boolean?,
     @SerializedName("poisonous_to_humans") val poisonousToHumans: Boolean?,
     @SerializedName("poisonous_to_pets") val poisonousToPets: Boolean?,
+    @SerializedName("pruning_month") val pruningMonths: List<String>? = null,
+    @SerializedName("pruning_count") val pruningCount: PruningCount? = null,
+    @SerializedName("growth_rate") val growthRate: String? = null,
+    @SerializedName("soil") val soil: List<String>? = null,
+    @SerializedName("rare") val rare: Boolean? = null,
     @SerializedName("default_image") val defaultImage: PlantImage?
+)
+
+data class PruningCount(
+    @SerializedName("amount") val amount: Int?,
+    @SerializedName("interval") val interval: String?
 )
 
 data class WateringBenchmark(

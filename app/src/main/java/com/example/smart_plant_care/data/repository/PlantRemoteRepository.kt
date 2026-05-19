@@ -39,19 +39,14 @@ class PlantRemoteRepository(
     suspend fun getPlantDetails(plantId: Int, apiKey: String): RemoteResult<PlantDetailsPayload> {
         return runCatching {
             val details = apiService.getPlantDetails(plantId, apiKey)
-            val shouldLoadCareGuide = details.watering.isNullOrBlank() || details.sunlight.isNullOrEmpty()
-            val careSections = if (shouldLoadCareGuide) {
-                runCatching {
-                    apiService
-                        .getSpeciesCareGuide(plantId, apiKey)
-                        .data
-                        .firstOrNull()
-                        ?.section
-                        .orEmpty()
-                }.getOrDefault(emptyList())
-            } else {
-                emptyList()
-            }
+            val careSections = runCatching {
+                apiService
+                    .getSpeciesCareGuide(plantId, apiKey)
+                    .data
+                    .firstOrNull()
+                    ?.section
+                    .orEmpty()
+            }.getOrDefault(emptyList())
             RemoteResult.Success(
                 PlantDetailsPayload(
                     plant = details,

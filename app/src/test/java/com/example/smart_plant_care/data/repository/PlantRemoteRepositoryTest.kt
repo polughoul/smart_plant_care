@@ -30,7 +30,10 @@ class PlantRemoteRepositoryTest {
                             sunlight = listOf("bright indirect"),
                             defaultImage = PlantImage(
                                 thumbnail = "thumb",
-                                regularUrl = "regular"
+                                smallUrl = null,
+                                mediumUrl = null,
+                                regularUrl = "regular",
+                                originalUrl = null
                             )
                         )
                     )

@@ -57,14 +57,23 @@ fun PlantDetailsEditScreen(
     var origin by rememberSaveable(plant?.id) { mutableStateOf(plant?.origin.orEmpty()) }
     var sunlight by rememberSaveable(plant?.id) { mutableStateOf(plant?.sunlight.orEmpty()) }
     var attracts by rememberSaveable(plant?.id) { mutableStateOf(plant?.attracts.orEmpty()) }
+    var pruningMonths by rememberSaveable(plant?.id) { mutableStateOf(plant?.pruningMonths.orEmpty()) }
+    var pruningCountAmount by rememberSaveable(plant?.id) { mutableStateOf(plant?.pruningCountAmount?.toString().orEmpty()) }
+    var pruningCountInterval by rememberSaveable(plant?.id) { mutableStateOf(plant?.pruningCountInterval.orEmpty()) }
+    var growthRate by rememberSaveable(plant?.id) { mutableStateOf(plant?.growthRate.orEmpty()) }
+    var soil by rememberSaveable(plant?.id) { mutableStateOf(plant?.soil.orEmpty()) }
     var fruitingSeason by rememberSaveable(plant?.id) { mutableStateOf(plant?.fruitingSeason.orEmpty()) }
     var harvestSeason by rememberSaveable(plant?.id) { mutableStateOf(plant?.harvestSeason.orEmpty()) }
     var harvestMethod by rememberSaveable(plant?.id) { mutableStateOf(plant?.harvestMethod.orEmpty()) }
     var description by rememberSaveable(plant?.id) { mutableStateOf(plant?.description.orEmpty()) }
+    var careGuideWatering by rememberSaveable(plant?.id) { mutableStateOf(plant?.careGuideWatering.orEmpty()) }
+    var careGuideSunlight by rememberSaveable(plant?.id) { mutableStateOf(plant?.careGuideSunlight.orEmpty()) }
+    var careGuidePruning by rememberSaveable(plant?.id) { mutableStateOf(plant?.careGuidePruning.orEmpty()) }
 
     var isMedicinal by rememberSaveable(plant?.id) { mutableStateOf(plant?.isMedicinal) }
     var isPoisonousToHumans by rememberSaveable(plant?.id) { mutableStateOf(plant?.isPoisonousToHumans) }
     var isPoisonousToPets by rememberSaveable(plant?.id) { mutableStateOf(plant?.isPoisonousToPets) }
+    var isRare by rememberSaveable(plant?.id) { mutableStateOf(plant?.rare) }
 
     LaunchedEffect(plant?.id) {
         speciesName = plant?.speciesName.orEmpty()
@@ -74,13 +83,22 @@ fun PlantDetailsEditScreen(
         origin = plant?.origin.orEmpty()
         sunlight = plant?.sunlight.orEmpty()
         attracts = plant?.attracts.orEmpty()
+        pruningMonths = plant?.pruningMonths.orEmpty()
+        pruningCountAmount = plant?.pruningCountAmount?.toString().orEmpty()
+        pruningCountInterval = plant?.pruningCountInterval.orEmpty()
+        growthRate = plant?.growthRate.orEmpty()
+        soil = plant?.soil.orEmpty()
         fruitingSeason = plant?.fruitingSeason.orEmpty()
         harvestSeason = plant?.harvestSeason.orEmpty()
         harvestMethod = plant?.harvestMethod.orEmpty()
         description = plant?.description.orEmpty()
+        careGuideWatering = plant?.careGuideWatering.orEmpty()
+        careGuideSunlight = plant?.careGuideSunlight.orEmpty()
+        careGuidePruning = plant?.careGuidePruning.orEmpty()
         isMedicinal = plant?.isMedicinal
         isPoisonousToHumans = plant?.isPoisonousToHumans
         isPoisonousToPets = plant?.isPoisonousToPets
+        isRare = plant?.rare
     }
 
     Scaffold(
@@ -109,6 +127,15 @@ fun PlantDetailsEditScreen(
                                         origin = origin.trim().ifBlank { null },
                                         sunlight = sunlight.trim().ifBlank { null },
                                         attracts = attracts.trim().ifBlank { null },
+                                        pruningMonths = pruningMonths.trim().ifBlank { null },
+                                        pruningCountAmount = pruningCountAmount.trim().toIntOrNull(),
+                                        pruningCountInterval = pruningCountInterval.trim().ifBlank { null },
+                                        growthRate = growthRate.trim().ifBlank { null },
+                                        soil = soil.trim().ifBlank { null },
+                                        rare = isRare,
+                                        careGuideWatering = careGuideWatering.trim().ifBlank { null },
+                                        careGuideSunlight = careGuideSunlight.trim().ifBlank { null },
+                                        careGuidePruning = careGuidePruning.trim().ifBlank { null },
                                         fruitingSeason = fruitingSeason.trim().ifBlank { null },
                                         harvestSeason = harvestSeason.trim().ifBlank { null },
                                         harvestMethod = harvestMethod.trim().ifBlank { null },
@@ -275,55 +302,149 @@ fun PlantDetailsEditScreen(
                         )
                     }
                 )
+
+                OutlinedTextField(
+                    value = pruningMonths,
+                    onValueChange = { pruningMonths = normalizeShortFieldInput(it) },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text(stringResource(R.string.details_edit_label_pruning_months)) },
+                    singleLine = true,
+                    supportingText = {
+                        Text(
+                            stringResource(
+                                R.string.details_edit_counter_format,
+                                pruningMonths.length,
+                                SHORT_FIELD_MAX_LENGTH
+                            )
+                        )
+                    }
+                )
+
+                OutlinedTextField(
+                    value = pruningCountAmount,
+                    onValueChange = { pruningCountAmount = normalizeShortFieldInput(it) },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text(stringResource(R.string.details_edit_label_pruning_count_amount)) },
+                    singleLine = true,
+                    supportingText = {
+                        Text(
+                            stringResource(
+                                R.string.details_edit_counter_format,
+                                pruningCountAmount.length,
+                                SHORT_FIELD_MAX_LENGTH
+                            )
+                        )
+                    }
+                )
+
+                OutlinedTextField(
+                    value = pruningCountInterval,
+                    onValueChange = { pruningCountInterval = normalizeShortFieldInput(it) },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text(stringResource(R.string.details_edit_label_pruning_count_interval)) },
+                    singleLine = true,
+                    supportingText = {
+                        Text(
+                            stringResource(
+                                R.string.details_edit_counter_format,
+                                pruningCountInterval.length,
+                                SHORT_FIELD_MAX_LENGTH
+                            )
+                        )
+                    }
+                )
+
+                OutlinedTextField(
+                    value = growthRate,
+                    onValueChange = { growthRate = normalizeShortFieldInput(it) },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text(stringResource(R.string.details_edit_label_growth_rate)) },
+                    singleLine = true,
+                    supportingText = {
+                        Text(
+                            stringResource(
+                                R.string.details_edit_counter_format,
+                                growthRate.length,
+                                SHORT_FIELD_MAX_LENGTH
+                            )
+                        )
+                    }
+                )
+
+                OutlinedTextField(
+                    value = soil,
+                    onValueChange = { soil = normalizeShortFieldInput(it) },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text(stringResource(R.string.details_edit_label_soil)) },
+                    singleLine = true,
+                    supportingText = {
+                        Text(
+                            stringResource(
+                                R.string.details_edit_counter_format,
+                                soil.length,
+                                SHORT_FIELD_MAX_LENGTH
+                            )
+                        )
+                    }
+                )
+
+                NullableBooleanSelector(
+                    title = stringResource(R.string.details_edit_label_rare),
+                    value = isRare,
+                    onValueChange = { isRare = it }
+                )
             }
 
-            EditFormSection(title = stringResource(R.string.details_edit_section_harvest)) {
+            EditFormSection(title = stringResource(R.string.details_edit_section_care_guide)) {
                 OutlinedTextField(
-                    value = fruitingSeason,
-                    onValueChange = { fruitingSeason = normalizeShortFieldInput(it) },
+                    value = careGuideWatering,
+                    onValueChange = { careGuideWatering = normalizeLongFieldInput(it) },
                     modifier = Modifier.fillMaxWidth(),
-                    label = { Text(stringResource(R.string.details_edit_label_fruiting_season)) },
-                    singleLine = true,
+                    label = { Text(stringResource(R.string.details_edit_label_care_watering)) },
+                    minLines = 4,
+                    maxLines = 8,
                     supportingText = {
                         Text(
                             stringResource(
                                 R.string.details_edit_counter_format,
-                                fruitingSeason.length,
-                                SHORT_FIELD_MAX_LENGTH
+                                careGuideWatering.length,
+                                DESCRIPTION_MAX_LENGTH
                             )
                         )
                     }
                 )
 
                 OutlinedTextField(
-                    value = harvestSeason,
-                    onValueChange = { harvestSeason = normalizeShortFieldInput(it) },
+                    value = careGuideSunlight,
+                    onValueChange = { careGuideSunlight = normalizeLongFieldInput(it) },
                     modifier = Modifier.fillMaxWidth(),
-                    label = { Text(stringResource(R.string.details_edit_label_harvest_season)) },
-                    singleLine = true,
+                    label = { Text(stringResource(R.string.details_edit_label_care_sunlight)) },
+                    minLines = 4,
+                    maxLines = 8,
                     supportingText = {
                         Text(
                             stringResource(
                                 R.string.details_edit_counter_format,
-                                harvestSeason.length,
-                                SHORT_FIELD_MAX_LENGTH
+                                careGuideSunlight.length,
+                                DESCRIPTION_MAX_LENGTH
                             )
                         )
                     }
                 )
 
                 OutlinedTextField(
-                    value = harvestMethod,
-                    onValueChange = { harvestMethod = normalizeShortFieldInput(it) },
+                    value = careGuidePruning,
+                    onValueChange = { careGuidePruning = normalizeLongFieldInput(it) },
                     modifier = Modifier.fillMaxWidth(),
-                    label = { Text(stringResource(R.string.details_edit_label_harvest_method)) },
-                    singleLine = true,
+                    label = { Text(stringResource(R.string.details_edit_label_care_pruning)) },
+                    minLines = 4,
+                    maxLines = 8,
                     supportingText = {
                         Text(
                             stringResource(
                                 R.string.details_edit_counter_format,
-                                harvestMethod.length,
-                                SHORT_FIELD_MAX_LENGTH
+                                careGuidePruning.length,
+                                DESCRIPTION_MAX_LENGTH
                             )
                         )
                     }
@@ -382,6 +503,15 @@ fun PlantDetailsEditScreen(
                             origin = origin.trim().ifBlank { null },
                             sunlight = sunlight.trim().ifBlank { null },
                             attracts = attracts.trim().ifBlank { null },
+                            pruningMonths = pruningMonths.trim().ifBlank { null },
+                            pruningCountAmount = pruningCountAmount.trim().toIntOrNull(),
+                            pruningCountInterval = pruningCountInterval.trim().ifBlank { null },
+                            growthRate = growthRate.trim().ifBlank { null },
+                            soil = soil.trim().ifBlank { null },
+                            rare = isRare,
+                            careGuideWatering = careGuideWatering.trim().ifBlank { null },
+                            careGuideSunlight = careGuideSunlight.trim().ifBlank { null },
+                            careGuidePruning = careGuidePruning.trim().ifBlank { null },
                             fruitingSeason = fruitingSeason.trim().ifBlank { null },
                             harvestSeason = harvestSeason.trim().ifBlank { null },
                             harvestMethod = harvestMethod.trim().ifBlank { null },
@@ -474,4 +604,3 @@ private fun EditFormSection(
         }
     }
 }
-

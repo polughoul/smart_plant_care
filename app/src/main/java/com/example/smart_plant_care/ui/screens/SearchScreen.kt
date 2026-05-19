@@ -23,6 +23,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.smart_plant_care.R
 import com.example.smart_plant_care.data.remote.dto.ApiPlantDto
+import com.example.smart_plant_care.data.remote.dto.bestImageUrl
 import com.example.smart_plant_care.ui.viewmodels.SearchUiState
 import com.example.smart_plant_care.ui.viewmodels.SearchViewModel
 
@@ -149,7 +150,7 @@ fun ApiPlantCard(plant: ApiPlantDto, onClick: () -> Unit) {
     Card(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
         Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
             AsyncImage(
-                model = plant.defaultImage?.thumbnail ?: "https://via.placeholder.com/150",
+                model = plant.defaultImage.bestImageUrl() ?: "https://via.placeholder.com/150",
                 contentDescription = stringResource(R.string.cd_plant_photo_format, plant.commonName),
                 modifier = Modifier.size(64.dp),
                 contentScale = ContentScale.Crop
