@@ -256,7 +256,7 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
                     onSaveClick = { customName, waterDays, imageUrl ->
                         val newPlant = MyPlantEntity(
                             customName = customName,
-                            speciesName = if (speciesName == MANUAL_ENTRY_SPECIES_TOKEN) customName else speciesName,
+                            speciesName = if (speciesName == MANUAL_ENTRY_SPECIES_TOKEN) null else speciesName,
                             scientificName = sharedPlantDetails?.scientificName?.firstOrNull(),
                             family = sharedPlantDetails?.family,
                             origin = sharedPlantDetails?.origin?.joinToString(),
@@ -288,7 +288,7 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
 
                 if (plantToEdit != null) {
                     EditScreen(
-                        speciesName = plantToEdit.speciesName,
+                        speciesName = plantToEdit.speciesName.orEmpty(),
                         defaultWaterDays = plantToEdit.waterIntervalDays,
                         initialCustomName = plantToEdit.customName,
                         initialImageUrl = plantToEdit.imageUrl,

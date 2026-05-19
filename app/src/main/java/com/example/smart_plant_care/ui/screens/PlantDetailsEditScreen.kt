@@ -102,7 +102,7 @@ fun PlantDetailsEditScreen(
                             if (plant != null) {
                                 onSaveClick(
                                     plant.copy(
-                                        speciesName = speciesName.trim().ifBlank { plant.customName },
+                                        speciesName = speciesName.trim().ifBlank { null },
                                         scientificName = scientificName.trim().ifBlank { null },
                                         family = family.trim().ifBlank { null },
                                         plantType = plantType.trim().ifBlank { null },
@@ -375,7 +375,7 @@ fun PlantDetailsEditScreen(
                 onClick = {
                     onSaveClick(
                         plant.copy(
-                            speciesName = speciesName.trim().ifBlank { plant.customName },
+                            speciesName = speciesName.trim().ifBlank { null },
                             scientificName = scientificName.trim().ifBlank { null },
                             family = family.trim().ifBlank { null },
                             plantType = plantType.trim().ifBlank { null },

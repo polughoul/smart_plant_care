@@ -473,7 +473,7 @@ fun MyGardenScreen(
             val query = searchQuery.trim().lowercase()
             plants.filter { plant ->
                 plant.customName.lowercase().contains(query) ||
-                    plant.speciesName.lowercase().contains(query)
+                    (plant.speciesName?.lowercase()?.contains(query) == true)
             }
         }
     }

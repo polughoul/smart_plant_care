@@ -1,5 +1,6 @@
 package com.example.smart_plant_care.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,11 +11,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -201,17 +202,51 @@ fun WateringHistoryScreen(
                     ),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(
+                    itemsIndexed(
                         items = filteredEvents,
-                        key = { event -> event.id }
-                    ) { event ->
-                        Card(modifier = Modifier.fillMaxWidth()) {
-                            Column(modifier = Modifier.padding(16.dp)) {
-                                Text(
-                                    text = formatWateringHistoryDate(event.wateredAt, datePattern),
-                                    style = MaterialTheme.typography.bodyLarge
-                                )
+                        key = { _, event -> event.id }
+                    ) { index, event ->
+                        val isLast = index == filteredEvents.lastIndex
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.Top
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .height(10.dp)
+                                        .width(10.dp)
+                                        .padding(top = 2.dp)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .background(
+                                                color = MaterialTheme.colorScheme.primary,
+                                                shape = MaterialTheme.shapes.extraSmall
+                                            )
+                                    )
+                                }
+
+                                if (!isLast) {
+                                    Box(
+                                        modifier = Modifier
+                                            .padding(top = 4.dp)
+                                            .width(2.dp)
+                                            .height(24.dp)
+                                            .background(MaterialTheme.colorScheme.outlineVariant)
+                                    )
+                                }
                             }
+
+                            Spacer(modifier = Modifier.width(12.dp))
+
+                            Text(
+                                text = formatWateringHistoryDate(event.wateredAt, datePattern),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
                         }
                     }
                 }

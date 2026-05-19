@@ -13,7 +13,7 @@ data class MyPlantEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     val customName: String,
-    val speciesName: String,
+    val speciesName: String? = null,
     val remotePlantId: Int? = null,
     val scientificName: String? = null,
     val family: String? = null,

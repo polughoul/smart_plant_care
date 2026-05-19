@@ -98,6 +98,10 @@ fun GardenPlantDetailsScreen(
             mutableStateOf(false)
         }
 
+        var isDescriptionExpanded by remember(plant.id, plant.description) {
+            mutableStateOf(false)
+        }
+
         val yesLabel = stringResource(R.string.common_yes)
         val noLabel = stringResource(R.string.common_no)
 
@@ -108,7 +112,7 @@ fun GardenPlantDetailsScreen(
         )
 
         val facts = buildList {
-            plant.speciesName.takeIf { it.isNotBlank() }?.let {
+            plant.speciesName?.takeIf { it.isNotBlank() }?.let {
                 add(stringResource(R.string.fact_species_format, it))
             }
 
@@ -196,13 +200,30 @@ fun GardenPlantDetailsScreen(
                 actionText = stringResource(R.string.common_edit),
                 onActionClick = onEditDetails
             ) {
+                val descriptionText = plant.description?.takeIf { it.isNotBlank() }
+                    ?: stringResource(R.string.details_no_description)
+
                 Text(
-                    text = plant.description?.takeIf { it.isNotBlank() }
-                        ?: stringResource(R.string.details_no_description),
+                    text = descriptionText,
                     style = MaterialTheme.typography.bodyMedium,
-                    maxLines = 6,
+                    maxLines = if (isDescriptionExpanded) Int.MAX_VALUE else 6,
                     overflow = TextOverflow.Ellipsis
                 )
+
+                if (plant.description?.isNotBlank() == true) {
+                    val canExpand = descriptionText.length > 200 || descriptionText.lines().size > 6
+                    if (canExpand) {
+                        TextButton(onClick = { isDescriptionExpanded = !isDescriptionExpanded }) {
+                            Text(
+                                text = if (isDescriptionExpanded) {
+                                    stringResource(R.string.details_show_less)
+                                } else {
+                                    stringResource(R.string.details_show_more)
+                                }
+                            )
+                        }
+                    }
+                }
             }
 
             DetailsSectionCard(
@@ -331,9 +352,9 @@ private fun PlantDetailsHero(
                 color = Color.White
             )
 
-            if (plant.speciesName.isNotBlank()) {
+            if (plant.speciesName?.isNotBlank() == true) {
                 Text(
-                    text = plant.speciesName,
+                    text = plant.speciesName.orEmpty(),
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.White.copy(alpha = 0.85f),
                     maxLines = 1,

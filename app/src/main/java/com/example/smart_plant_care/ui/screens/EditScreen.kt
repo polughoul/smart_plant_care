@@ -156,7 +156,7 @@ fun EditScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            if (!isManual) {
+            if (!isManual && speciesName.isNotBlank()) {
                 Text(
                     text = stringResource(R.string.edit_selected_format, speciesName),
                     style = MaterialTheme.typography.titleMedium,
