@@ -16,12 +16,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -34,8 +37,8 @@ import androidx.compose.ui.unit.dp
 import com.example.smart_plant_care.R
 import com.example.smart_plant_care.data.local.entity.MyPlantEntity
 import com.example.smart_plant_care.data.local.entity.WateringEventEntity
+import com.example.smart_plant_care.ui.util.rememberDayToken
 import java.time.Instant
-import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -55,14 +58,17 @@ private enum class WateringHistoryFilter {
 fun WateringHistoryScreen(
     plant: MyPlantEntity?,
     wateringEvents: List<WateringEventEntity>,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onClearHistory: () -> Unit
 ) {
     var selectedFilter by remember {
         mutableStateOf(WateringHistoryFilter.ALL)
     }
+    var showClearDialog by remember { mutableStateOf(false) }
+    val dayToken = rememberDayToken()
 
-    val filteredEvents = remember(wateringEvents, selectedFilter) {
-        val today = LocalDate.now()
+    val filteredEvents = remember(wateringEvents, selectedFilter, dayToken) {
+        val today = dayToken
 
         wateringEvents.filter { event ->
             val eventDate = Instant
@@ -100,10 +106,43 @@ fun WateringHistoryScreen(
                             contentDescription = stringResource(R.string.common_cd_back)
                         )
                     }
+                },
+                actions = {
+                    IconButton(
+                        onClick = { showClearDialog = true },
+                        enabled = wateringEvents.isNotEmpty()
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = stringResource(R.string.watering_history_clear)
+                        )
+                    }
                 }
             )
         }
     ) { paddingValues ->
+        if (showClearDialog) {
+            AlertDialog(
+                onDismissRequest = { showClearDialog = false },
+                title = { Text(stringResource(R.string.watering_history_clear_title)) },
+                text = { Text(stringResource(R.string.watering_history_clear_message)) },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            showClearDialog = false
+                            onClearHistory()
+                        }
+                    ) {
+                        Text(stringResource(R.string.watering_history_clear_confirm))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showClearDialog = false }) {
+                        Text(stringResource(R.string.watering_history_clear_cancel))
+                    }
+                }
+            )
+        }
         if (plant == null) {
             Box(
                 modifier = Modifier

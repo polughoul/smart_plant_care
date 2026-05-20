@@ -18,9 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.Modifier
@@ -42,6 +40,7 @@ import com.example.smart_plant_care.ui.screens.MANUAL_ENTRY_SPECIES_TOKEN
 import com.example.smart_plant_care.ui.screens.MyGardenScreen
 import com.example.smart_plant_care.ui.screens.SearchScreen
 import com.example.smart_plant_care.ui.screens.SettingsScreen
+import com.example.smart_plant_care.ui.screens.HelpScreen
 import com.example.smart_plant_care.ui.viewmodels.GardenViewModel
 import com.example.smart_plant_care.ui.viewmodels.GardenViewModelFactory
 import com.example.smart_plant_care.ui.screens.DetailsScreen
@@ -68,8 +67,6 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
     val allPlants by gardenViewModel.plantsList.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = androidx.compose.runtime.rememberCoroutineScope()
-
-    var sharedPlantDetails by remember { mutableStateOf<com.example.smart_plant_care.data.remote.dto.PlantDetailsDto?>(null) }
 
     LaunchedEffect(settingsUiState.notificationsEnabled, allPlants) {
         if (settingsUiState.notificationsEnabled && PlantReminderScheduler.hasNotificationPermission(context)) {
@@ -155,6 +152,27 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
                     },
                     onMarkPlantWatered = { plantId ->
                         gardenViewModel.markPlantAsWatered(plantId)
+                        val plantName = allPlants
+                            .firstOrNull { it.id == plantId }
+                            ?.customName
+                            ?: context.getString(R.string.main_fallback_plant_name)
+                        scope.launch {
+                            snackbarHostState.showSnackbar(
+                                context.getString(R.string.watering_snackbar_watered_format, plantName)
+                            )
+                        }
+                    },
+                    onMarkPlantsWatered = { plantIds ->
+                        if (plantIds.isEmpty()) return@MyGardenScreen
+                        gardenViewModel.markPlantsAsWatered(plantIds)
+                        val message = context.resources.getQuantityString(
+                            R.plurals.watering_snackbar_watered_multiple,
+                            plantIds.size,
+                            plantIds.size
+                        )
+                        scope.launch {
+                            snackbarHostState.showSnackbar(message)
+                        }
                     },
                     onEditPlant = { plantId ->
                         navController.navigate(Screen.EditExisting.createRoute(plantId))
@@ -165,14 +183,16 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
                 )
             }
             composable(Screen.Settings.route) {
-                SettingsScreen(settingsViewModel = settingsViewModel)
+                SettingsScreen(
+                    settingsViewModel = settingsViewModel,
+                    onOpenHelp = { navController.navigate(Screen.Help.route) }
+                )
             }
             composable(Screen.Search.route) {
                 SearchScreen(
                     onBackClick = { navController.popBackStack() },
                     onPlantClick = { plantId ->
                         if (plantId == -1) {
-                            sharedPlantDetails = null
                             navController.navigate(Screen.Edit.createRoute(MANUAL_ENTRY_SPECIES_TOKEN, 7))
                         } else {
                             navController.navigate(Screen.Details.createRoute(plantId))
@@ -272,38 +292,37 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
                 EditScreen(
                     speciesName = speciesName,
                     defaultWaterDays = defaultWaterDays,
-                    initialImageUrl = sharedPlantDetails?.defaultImage?.bestImageUrl(),
+                    initialImageUrl = null,
                     onBackClick = { navController.popBackStack() },
                     onSaveClick = { customName, waterDays, imageUrl ->
                         val newPlant = MyPlantEntity(
                             customName = customName,
                             speciesName = if (speciesName == MANUAL_ENTRY_SPECIES_TOKEN) null else speciesName,
-                            scientificName = sharedPlantDetails?.scientificName?.firstOrNull(),
-                            family = sharedPlantDetails?.family,
-                            origin = sharedPlantDetails?.origin?.joinToString(),
-                            plantType = sharedPlantDetails?.type,
-                            sunlight = sharedPlantDetails?.sunlight?.joinToString(),
-                            attracts = sharedPlantDetails?.attracts?.joinToString(),
-                            pruningMonths = sharedPlantDetails?.pruningMonths?.joinToString(),
-                            pruningCountAmount = sharedPlantDetails?.pruningCount?.amount,
-                            pruningCountInterval = sharedPlantDetails?.pruningCount?.interval,
-                            growthRate = sharedPlantDetails?.growthRate,
-                            soil = sharedPlantDetails?.soil?.joinToString(),
-                            rare = sharedPlantDetails?.rare,
-                            description = sharedPlantDetails?.description,
+                            scientificName = null,
+                            family = null,
+                            origin = null,
+                            plantType = null,
+                            sunlight = null,
+                            attracts = null,
+                            pruningMonths = null,
+                            pruningCountAmount = null,
+                            pruningCountInterval = null,
+                            growthRate = null,
+                            soil = null,
+                            rare = null,
+                            description = null,
                             waterIntervalDays = waterDays,
                             nextWateringDate = System.currentTimeMillis() + (waterDays * 24L * 60 * 60 * 1000),
-                            fruitingSeason = sharedPlantDetails?.fruitingSeason,
-                            harvestSeason = sharedPlantDetails?.harvestSeason,
-                            harvestMethod = sharedPlantDetails?.harvestMethod,
-                            isMedicinal = sharedPlantDetails?.medicinal,
-                            isPoisonousToHumans = sharedPlantDetails?.poisonousToHumans,
-                            isPoisonousToPets = sharedPlantDetails?.poisonousToPets,
+                            fruitingSeason = null,
+                            harvestSeason = null,
+                            harvestMethod = null,
+                            isMedicinal = null,
+                            isPoisonousToHumans = null,
+                            isPoisonousToPets = null,
                             imageUrl = imageUrl
                         )
                         gardenViewModel.insertPlant(newPlant)
 
-                        sharedPlantDetails = null
                         navController.popBackStack(Screen.MyGarden.route, inclusive = false)
                     }
                 )
@@ -415,8 +434,26 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
                 WateringHistoryScreen(
                     plant = plant,
                     wateringEvents = wateringEvents,
-                    onBackClick = { navController.popBackStack() }
+                    onBackClick = { navController.popBackStack() },
+                    onClearHistory = {
+                        if (plant != null && wateringEvents.isNotEmpty()) {
+                            val eventsSnapshot = wateringEvents.toList()
+                            gardenViewModel.clearWateringHistory(plant.id)
+                            scope.launch {
+                                val result = snackbarHostState.showSnackbar(
+                                    message = context.getString(R.string.watering_history_cleared),
+                                    actionLabel = context.getString(R.string.my_garden_undo)
+                                )
+                                if (result == SnackbarResult.ActionPerformed) {
+                                    gardenViewModel.restoreWateringEvents(eventsSnapshot)
+                                }
+                            }
+                        }
+                    }
                 )
+            }
+            composable(Screen.Help.route) {
+                HelpScreen(onBackClick = { navController.popBackStack() })
             }
         }
     }

@@ -31,6 +31,7 @@
     <string name="main_fallback_plant_name">Plant</string>
 
     <string name="my_garden_title">My Garden</string>
+    <string name="my_garden_tagline">Take care of your plants</string>
     <string name="my_garden_fab_cd">Find plant</string>
     <string name="my_garden_empty">No plants yet</string>
     <string name="my_garden_search_label">Search in my garden</string>
@@ -216,4 +217,32 @@
     <string name="details_edit_section_harvest">Harvest</string>
     <string name="details_edit_section_description">Description</string>
     <string name="details_edit_section_safety">Safety</string>
+
+    <string name="watering_history_clear">Clear history</string>
+    <string name="watering_history_clear_title">Clear watering history?</string>
+    <string name="watering_history_clear_message">This will remove all watering records for this plant.</string>
+    <string name="watering_history_clear_confirm">Clear</string>
+    <string name="watering_history_clear_cancel">Cancel</string>
+    <string name="watering_history_cleared">Watering history cleared</string>
+    <string name="watering_snackbar_watered_format">%1$s watered</string>
+    <plurals name="watering_snackbar_watered_multiple">
+        <item quantity="one">Watered %1$d plant</item>
+        <item quantity="other">Watered %1$d plants</item>
+    </plurals>
+
+    <string name="settings_help_title">Help</string>
+    <string name="settings_help_subtitle">How to use the app</string>
+    <string name="settings_help_action">Open help</string>
+
+    <string name="help_title">Help</string>
+    <string name="help_section_watering_title">How to mark a plant as watered</string>
+    <string name="help_section_watering_body">In My Garden, swipe a plant card to the right to reveal actions. Tap the check icon to mark it as watered. You can also select multiple plants and use Watered.</string>
+    <string name="help_section_edit_title">How to change name or photo</string>
+    <string name="help_section_edit_body">In My Garden, swipe a plant card to the right and tap the edit icon to change name, watering interval, or photo.</string>
+    <string name="help_section_history_title">How to clear watering history</string>
+    <string name="help_section_history_body">Open a plant and tap View all in Watering history. On the history screen, tap the trash icon in the top bar to clear. You can undo right after.</string>
+    <string name="help_section_search_title">How to add a new plant</string>
+    <string name="help_section_search_body">Use Find plant to search the catalog, then add to My Garden. You can also create a custom plant.</string>
+    <string name="help_section_reminders_title">How to enable reminders</string>
+    <string name="help_section_reminders_body">Go to Settings and enable Watering reminders. If needed, allow notifications in system settings.</string>
 </resources>

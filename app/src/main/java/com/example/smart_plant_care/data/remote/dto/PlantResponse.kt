@@ -1,5 +1,6 @@
 package com.example.smart_plant_care.data.remote.dto
 
+import com.google.gson.annotations.JsonAdapter
 import com.google.gson.annotations.SerializedName
 
 
@@ -64,6 +65,7 @@ data class PlantDetailsDto(
     @SerializedName("poisonous_to_humans") val poisonousToHumans: Boolean?,
     @SerializedName("poisonous_to_pets") val poisonousToPets: Boolean?,
     @SerializedName("pruning_month") val pruningMonths: List<String>? = null,
+    @JsonAdapter(PruningCountAdapter::class)
     @SerializedName("pruning_count") val pruningCount: PruningCount? = null,
     @SerializedName("growth_rate") val growthRate: String? = null,
     @SerializedName("soil") val soil: List<String>? = null,

@@ -11,6 +11,7 @@ import com.example.smart_plant_care.MainActivity
 import com.example.smart_plant_care.R
 import com.example.smart_plant_care.data.local.db.AppDatabase
 import com.example.smart_plant_care.data.local.entity.WateringEventEntity
+import com.example.smart_plant_care.util.calculateNextWateringDate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -30,8 +31,9 @@ class PlantReminderReceiver : BroadcastReceiver() {
 		val pendingResult = goAsync()
 		CoroutineScope(Dispatchers.IO).launch {
 			try {
-				val plantDao = AppDatabase.getDatabase(context).plantDao()
-				val wateringEventDao = AppDatabase.getDatabase(context).wateringEventDao()
+				val database = AppDatabase.getDatabase(context)
+				val plantDao = database.plantDao()
+				val wateringEventDao = database.wateringEventDao()
 				when (action) {
 					PlantReminderScheduler.ACTION_MARK_WATERED -> {
 						val plant = plantDao.getPlantById(plantId)
@@ -93,10 +95,5 @@ class PlantReminderReceiver : BroadcastReceiver() {
 			.build()
 
 		NotificationManagerCompat.from(context).notify(plantId, notification)
-	}
-
-	private fun calculateNextWateringDate(waterIntervalDays: Int): Long {
-		val days = waterIntervalDays.coerceAtLeast(1)
-		return System.currentTimeMillis() + days * 24L * 60L * 60L * 1000L
 	}
 }

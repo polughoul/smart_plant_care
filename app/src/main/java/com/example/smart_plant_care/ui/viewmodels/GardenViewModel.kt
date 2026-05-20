@@ -49,6 +49,18 @@ class GardenViewModel(private val repository: PlantRepository) : ViewModel() {
         }
     }
 
+    fun clearWateringHistory(plantId: Int) {
+        viewModelScope.launch {
+            repository.clearWateringHistory(plantId)
+        }
+    }
+
+    fun restoreWateringEvents(events: List<WateringEventEntity>) {
+        viewModelScope.launch {
+            repository.restoreWateringEvents(events)
+        }
+    }
+
     fun recentWateringEvents(plantId: Int, limit: Int = 3): Flow<List<WateringEventEntity>> {
         return repository.getRecentWateringEvents(plantId, limit)
     }

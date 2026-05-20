@@ -105,7 +105,7 @@ fun SearchScreen(
 
                 is SearchUiState.Success -> {
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        items(state.plants) { plant ->
+                        items(state.plants, key = { it.id }) { plant ->
                             ApiPlantCard(plant = plant, onClick = { onPlantClick(plant.id) })
                         }
                     }

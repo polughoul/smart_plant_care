@@ -17,8 +17,6 @@ interface PlantDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insertPlant(plant: MyPlantEntity): Long
 
-    @Query("SELECT COUNT(*) > 0 FROM my_plants WHERE remotePlantId = :remotePlantId")
-    fun existsByRemotePlantId(remotePlantId: Int): Boolean
 
     @Query("SELECT * FROM my_plants WHERE id = :plantId LIMIT 1")
     fun getPlantById(plantId: Int): MyPlantEntity?

@@ -31,6 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -57,14 +58,10 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.snap
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.Snackbar
-import androidx.compose.material3.SnackbarData
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.foundation.Image
 import androidx.compose.ui.res.painterResource
-import kotlinx.coroutines.delay
+import com.example.smart_plant_care.ui.util.rememberDayToken
 import com.example.smart_plant_care.R
 import com.example.smart_plant_care.data.preferences.GardenSortOption
 import com.example.smart_plant_care.data.preferences.UserPreferences
@@ -72,6 +69,7 @@ import com.example.smart_plant_care.data.preferences.UserPreferencesDataStore
 import com.example.smart_plant_care.ui.viewmodels.GardenViewModel
 import coil.compose.AsyncImage
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import kotlin.math.roundToInt
@@ -340,57 +338,6 @@ private fun PulsingAddFab(
 }
 
 @Composable
-private fun UndoSnackbar(
-    snackbarData: SnackbarData
-) {
-    var targetProgress by remember(snackbarData) { mutableFloatStateOf(1f) }
-
-    val progress by animateFloatAsState(
-        targetValue = targetProgress,
-        animationSpec = tween(
-            durationMillis = 3000,
-            easing = LinearEasing
-        ),
-        label = "undoSnackbarProgress"
-    )
-
-    LaunchedEffect(snackbarData) {
-        targetProgress = 0f
-        delay(3000)
-        snackbarData.dismiss()
-    }
-
-    Snackbar(
-        modifier = Modifier.padding(12.dp),
-        action = {
-            snackbarData.visuals.actionLabel?.let { actionLabel ->
-                TextButton(
-                    onClick = {
-                        snackbarData.performAction()
-                    }
-                ) {
-                    Text(actionLabel)
-                }
-            }
-        }
-    ) {
-        Column {
-            Text(text = snackbarData.visuals.message)
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            LinearProgressIndicator(
-                progress = { progress },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(3.dp)
-                    .clip(MaterialTheme.shapes.small)
-            )
-        }
-    }
-}
-
-@Composable
 private fun MyGardenHeader() {
     Box(
         modifier = Modifier
@@ -418,7 +365,7 @@ private fun MyGardenHeader() {
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "Take care of your plants",
+                text = stringResource(R.string.my_garden_tagline),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.75f)
             )
@@ -433,6 +380,7 @@ fun MyGardenScreen(
     onNavigateToSearch: () -> Unit,
     onDeletePlant: (Int) -> Unit,
     onMarkPlantWatered: (Int) -> Unit,
+    onMarkPlantsWatered: (List<Int>) -> Unit,
     onEditPlant: (Int) -> Unit,
     onOpenPlantDetails: (Int) -> Unit
 ) {
@@ -450,6 +398,7 @@ fun MyGardenScreen(
     val sortOption = preferences.gardenSortOption
     var sortExpanded by remember { mutableStateOf(false) }
     val isSelectionMode = selectedPlantIds.isNotEmpty()
+    val dayToken = rememberDayToken()
 
     LaunchedEffect(plants) {
         val existingIds = plants.map { it.id }.toSet()
@@ -466,33 +415,37 @@ fun MyGardenScreen(
         }
     }
 
-    val filteredPlants = remember(plants, searchQuery) {
-        if (searchQuery.isBlank()) {
-            plants
-        } else {
-            val query = searchQuery.trim().lowercase()
-            plants.filter { plant ->
-                plant.customName.lowercase().contains(query) ||
-                    (plant.speciesName?.lowercase()?.contains(query) == true)
+    val filteredPlants by remember(plants, searchQuery) {
+        derivedStateOf {
+            if (searchQuery.isBlank()) {
+                plants
+            } else {
+                val query = searchQuery.trim().lowercase()
+                plants.filter { plant ->
+                    plant.customName.lowercase().contains(query) ||
+                        (plant.speciesName?.lowercase()?.contains(query) == true)
+                }
             }
         }
     }
-    val sortedPlants = remember(filteredPlants, sortOption) {
-        when (sortOption) {
-            GardenSortOption.NEXT_WATERING -> filteredPlants.sortedWith(
-                compareBy<com.example.smart_plant_care.data.local.entity.MyPlantEntity> { it.nextWateringDate }
-                    .thenBy { it.customName.lowercase() }
-            )
-            GardenSortOption.NAME -> filteredPlants.sortedWith(
-                compareBy<com.example.smart_plant_care.data.local.entity.MyPlantEntity> { it.customName.lowercase() }
-                    .thenBy { it.nextWateringDate }
-            )
+    val sortedPlants by remember(filteredPlants, sortOption) {
+        derivedStateOf {
+            when (sortOption) {
+                GardenSortOption.NEXT_WATERING -> filteredPlants.sortedWith(
+                    compareBy<com.example.smart_plant_care.data.local.entity.MyPlantEntity> { it.nextWateringDate }
+                        .thenBy { it.customName.lowercase() }
+                )
+                GardenSortOption.NAME -> filteredPlants.sortedWith(
+                    compareBy<com.example.smart_plant_care.data.local.entity.MyPlantEntity> { it.customName.lowercase() }
+                        .thenBy { it.nextWateringDate }
+                )
+            }
         }
     }
     val selectedCountLabel = stringResource(R.string.cd_selected_count_format, selectedPlantIds.size)
 
     Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState){snackbarData -> UndoSnackbar(snackbarData=snackbarData)} },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             MyGardenHeader()
         },
@@ -584,7 +537,7 @@ fun MyGardenScreen(
                         selectedCount = selectedPlantIds.size,
                         onMarkWatered = {
                             val idsToWater = selectedPlantIds.toList()
-                            idsToWater.forEach(onMarkPlantWatered)
+                            onMarkPlantsWatered(idsToWater)
                             selectedPlantIds = emptySet()
                         },
                         onDeleteSelected = { pendingDeleteIds = selectedPlantIds },
@@ -609,12 +562,12 @@ fun MyGardenScreen(
                         contentPadding = PaddingValues(bottom = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        items(sortedPlants) { plant ->
+                        items(sortedPlants, key = { it.id }) { plant ->
                             PlantCard(
                                 modifier = Modifier.animateItem(),
                                 imageModel = plant.imageUrl,
                                 name = plant.customName,
-                                status = calculateDaysRemaining(context, plant.nextWateringDate),
+                                status = calculateDaysRemaining(context, plant.nextWateringDate, dayToken),
                                 isSelectionMode = isSelectionMode,
                                 isSelected = selectedPlantIds.contains(plant.id),
                                 isActionsRevealed = revealedPlantId == plant.id,
@@ -763,12 +716,15 @@ private fun SelectionActionPanel(
     }
 }
 
-fun calculateDaysRemaining(context: Context, nextWateringMillis: Long): String {
+fun calculateDaysRemaining(
+    context: Context,
+    nextWateringMillis: Long,
+    today: LocalDate
+): String {
     val now = System.currentTimeMillis()
     if (nextWateringMillis <= now) return context.getString(R.string.watering_status_due_now)
 
     val zoneId = ZoneId.systemDefault()
-    val today = Instant.ofEpochMilli(now).atZone(zoneId).toLocalDate()
     val nextDate = Instant.ofEpochMilli(nextWateringMillis).atZone(zoneId).toLocalDate()
     val daysUntil = ChronoUnit.DAYS.between(today, nextDate).toInt()
 
