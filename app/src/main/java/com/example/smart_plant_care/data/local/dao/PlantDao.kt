@@ -17,6 +17,9 @@ interface PlantDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insertPlant(plant: MyPlantEntity): Long
 
+    @Query("SELECT * FROM my_plants")
+    fun getAllPlantsOnce(): List<MyPlantEntity>
+
 
     @Query("SELECT * FROM my_plants WHERE id = :plantId LIMIT 1")
     fun getPlantById(plantId: Int): MyPlantEntity?
@@ -29,4 +32,7 @@ interface PlantDao {
 
     @Query("DELETE FROM my_plants WHERE id = :plantId")
     fun deletePlantById(plantId: Int)
+
+    @Query("DELETE FROM my_plants WHERE noteText = :noteText")
+    fun deletePlantsByNoteText(noteText: String)
 }

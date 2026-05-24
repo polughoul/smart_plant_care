@@ -9,6 +9,12 @@
     <string name="settings_reminders_title">Watering reminders</string>
     <string name="settings_reminders_subtitle">Use this switch to enable notifications later.</string>
     <string name="settings_notification_permission_denied">Notifications are enabled, but permission is denied in system settings.</string>
+    <string name="settings_demo_title">Demo reminders</string>
+    <string name="settings_demo_subtitle">Use these buttons to test real daily reminder logic in 5 seconds.</string>
+    <string name="settings_demo_test_single">Test 1 plant reminder in 5s</string>
+    <string name="settings_demo_test_multiple">Test 3 plants reminder in 5s</string>
+    <string name="settings_demo_snackbar_single">Single demo reminder will appear in about 5 seconds</string>
+    <string name="settings_demo_snackbar_multiple">Multiple demo reminder will appear in about 5 seconds</string>
 
     <string name="notification_title_watering_reminder">Watering reminder</string>
     <string name="notification_text_time_to_water">Time to water %1$s</string>
@@ -22,8 +28,10 @@
     <string name="common_save">Save</string>
 
     <string name="nav_my_garden">My Garden</string>
+    <string name="nav_search">Search</string>
     <string name="nav_settings">Settings</string>
     <string name="nav_cd_garden">Garden</string>
+    <string name="nav_cd_search">Search</string>
     <string name="nav_cd_settings">Settings</string>
     <string name="main_snackbar_added_to_garden">Plant added to My Garden</string>
     <string name="main_snackbar_duplicate">This plant is already in your garden</string>
@@ -245,4 +253,10 @@
     <string name="help_section_search_body">Use Find plant to search the catalog, then add to My Garden. You can also create a custom plant.</string>
     <string name="help_section_reminders_title">How to enable reminders</string>
     <string name="help_section_reminders_body">Go to Settings and enable Watering reminders. If needed, allow notifications in system settings.</string>
+    <plurals name="notification_text_multiple_plants_due">
+        <item quantity="one">%1$d plant needs watering today</item>
+        <item quantity="other">%1$d plants need watering today</item>
+    </plurals>
+    <string name="notification_channel_name">Watering reminders</string>
+    <string name="notification_channel_description">Notifications for plant watering time</string>
 </resources>

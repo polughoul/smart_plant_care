@@ -68,6 +68,20 @@ class GardenViewModel(private val repository: PlantRepository) : ViewModel() {
     fun allWateringEvents(plantId: Int): Flow<List<WateringEventEntity>> {
         return repository.getAllWateringEvents(plantId)
     }
+
+    fun createDemoDuePlant(onComplete: (() -> Unit)? = null) {
+        viewModelScope.launch {
+            repository.replaceDemoDuePlants(count = 1)
+            onComplete?.invoke()
+        }
+    }
+
+    fun createDemoDuePlants(count: Int, onComplete: (() -> Unit)? = null) {
+        viewModelScope.launch {
+            repository.replaceDemoDuePlants(count = count)
+            onComplete?.invoke()
+        }
+    }
 }
 class GardenViewModelFactory(private val repository: PlantRepository) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {

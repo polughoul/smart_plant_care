@@ -3,12 +3,14 @@ package com.example.smart_plant_care.ui.main
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -50,6 +52,7 @@ import com.example.smart_plant_care.ui.screens.WateringHistoryScreen
 import com.example.smart_plant_care.ui.screens.PlantDetailsEditScreen
 import com.example.smart_plant_care.data.remote.dto.bestImageUrl
 import java.net.URLDecoder.decode
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
@@ -70,9 +73,12 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
 
     LaunchedEffect(settingsUiState.notificationsEnabled, allPlants) {
         if (settingsUiState.notificationsEnabled && PlantReminderScheduler.hasNotificationPermission(context)) {
-            allPlants.forEach { plant -> PlantReminderScheduler.scheduleReminder(context, plant) }
+            PlantReminderScheduler.scheduleDailyReminderCheck(context)
         } else {
-            allPlants.forEach { plant -> PlantReminderScheduler.cancelReminder(context, plant.id) }
+            PlantReminderScheduler.cancelDailyReminderCheck(context)
+            allPlants.forEach { plant ->
+                PlantReminderScheduler.cancelReminder(context, plant.id)
+            }
         }
     }
 
@@ -80,7 +86,11 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         bottomBar = {
-            if (currentRoute == Screen.MyGarden.route || currentRoute == Screen.Settings.route) {
+            if (
+                currentRoute == Screen.MyGarden.route ||
+                currentRoute == Screen.Search.route ||
+                currentRoute == Screen.Settings.route
+            ) {
                 NavigationBar(
                     containerColor = MaterialTheme.colorScheme.surface
                 ) {
@@ -102,6 +112,30 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
                         ),
                         onClick = {
                             navController.navigate(Screen.MyGarden.route) {
+                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
+                    )
+                    NavigationBarItem(
+                        icon = {
+                            Icon(
+                                Icons.Default.Search,
+                                contentDescription = stringResource(R.string.nav_cd_search)
+                            )
+                        },
+                        label = { Text(stringResource(R.string.nav_search)) },
+                        selected = currentRoute == Screen.Search.route,
+                        colors = NavigationBarItemDefaults.colors(
+                            indicatorColor = Color.Transparent,
+                            selectedIconColor = MaterialTheme.colorScheme.primary,
+                            selectedTextColor = MaterialTheme.colorScheme.primary,
+                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        ),
+                        onClick = {
+                            navController.navigate(Screen.Search.route) {
                                 popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                                 launchSingleTop = true
                                 restoreState = true
@@ -185,7 +219,29 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
             composable(Screen.Settings.route) {
                 SettingsScreen(
                     settingsViewModel = settingsViewModel,
-                    onOpenHelp = { navController.navigate(Screen.Help.route) }
+                    onOpenHelp = { navController.navigate(Screen.Help.route) },
+                    onTestSingleReminder = {
+                        gardenViewModel.createDemoDuePlant {
+                            scope.launch {
+                                snackbarHostState.showSnackbar(
+                                    context.getString(R.string.settings_demo_snackbar_single)
+                                )
+                                delay(5_000L)
+                                PlantReminderScheduler.triggerDailyReminderCheckNow(context)
+                            }
+                        }
+                    },
+                    onTestMultipleReminder = {
+                        gardenViewModel.createDemoDuePlants(3) {
+                            scope.launch {
+                                snackbarHostState.showSnackbar(
+                                    context.getString(R.string.settings_demo_snackbar_multiple)
+                                )
+                                delay(5_000L)
+                                PlantReminderScheduler.triggerDailyReminderCheckNow(context)
+                            }
+                        }
+                    }
                 )
             }
             composable(Screen.Search.route) {
@@ -261,10 +317,16 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
 
                                 InsertPlantResult.Duplicate -> {
                                     scope.launch {
+                                        val autoDismissJob = launch {
+                                            delay(3_000L)
+                                            snackbarHostState.currentSnackbarData?.dismiss()
+                                        }
                                         val snackbarResult = snackbarHostState.showSnackbar(
                                             message = context.getString(R.string.main_snackbar_duplicate),
-                                            actionLabel = context.getString(R.string.main_snackbar_action_open_garden)
+                                            actionLabel = context.getString(R.string.main_snackbar_action_open_garden),
+                                            duration = SnackbarDuration.Indefinite
                                         )
+                                        autoDismissJob.cancel()
                                         if (snackbarResult == SnackbarResult.ActionPerformed) {
                                             val popped = navController.popBackStack(
                                                 Screen.MyGarden.route,

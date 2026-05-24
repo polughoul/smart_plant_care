@@ -12,6 +12,8 @@ import com.example.smart_plant_care.R
 import com.example.smart_plant_care.data.local.db.AppDatabase
 import com.example.smart_plant_care.data.local.entity.WateringEventEntity
 import com.example.smart_plant_care.util.calculateNextWateringDate
+import java.time.LocalDate
+import java.time.ZoneId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -20,42 +22,83 @@ class PlantReminderReceiver : BroadcastReceiver() {
 
 	@SuppressLint("MissingPermission")
 	override fun onReceive(context: Context, intent: Intent) {
-		val plantId = PlantReminderScheduler.readPlantId(intent)
-		if (plantId <= 0) return
 		val action = PlantReminderScheduler.readAction(intent)
+
 		if (
-			action != PlantReminderScheduler.ACTION_REMINDER_TRIGGER &&
+			action != PlantReminderScheduler.ACTION_DAILY_REMINDER_CHECK &&
 			action != PlantReminderScheduler.ACTION_MARK_WATERED
-		) return
+		) {
+			return
+		}
 
 		val pendingResult = goAsync()
+
 		CoroutineScope(Dispatchers.IO).launch {
 			try {
 				val database = AppDatabase.getDatabase(context)
 				val plantDao = database.plantDao()
 				val wateringEventDao = database.wateringEventDao()
+
 				when (action) {
 					PlantReminderScheduler.ACTION_MARK_WATERED -> {
-						val plant = plantDao.getPlantById(plantId)
-						if (plant != null) {
-							val nextWateringDate = calculateNextWateringDate(plant.waterIntervalDays)
-							plantDao.updateNextWateringDateById(plantId, nextWateringDate)
-							wateringEventDao.insertEvent(
-								WateringEventEntity(plantId = plantId, wateredAt = System.currentTimeMillis())
-							)
-							val updatedPlant = plant.copy(nextWateringDate = nextWateringDate)
-							PlantReminderScheduler.scheduleReminder(context, updatedPlant)
+						val plantId = PlantReminderScheduler.readPlantId(intent)
+
+						if (plantId <= 0) {
+							return@launch
 						}
-						NotificationManagerCompat.from(context).cancel(plantId)
+
+						val plant = plantDao.getPlantById(plantId)
+
+						if (plant != null) {
+							val nextWateringDate = calculateNextWateringDate(
+								waterIntervalDays = plant.waterIntervalDays
+							)
+
+							plantDao.updateNextWateringDateById(
+								plantId = plantId,
+								nextWateringDate = nextWateringDate
+							)
+
+							wateringEventDao.insertEvent(
+								WateringEventEntity(
+									plantId = plantId,
+									wateredAt = System.currentTimeMillis()
+								)
+							)
+
+							NotificationManagerCompat.from(context).cancel(plantId)
+						}
 					}
 
-					PlantReminderScheduler.ACTION_REMINDER_TRIGGER -> {
-						val plant = plantDao.getPlantById(plantId) ?: return@launch
-						if (!PlantReminderScheduler.hasNotificationPermission(context)) return@launch
+					PlantReminderScheduler.ACTION_DAILY_REMINDER_CHECK -> {
+						if (PlantReminderScheduler.hasNotificationPermission(context)) {
+							val plants = plantDao.getAllPlantsOnce()
 
-						PlantReminderScheduler.createNotificationChannel(context)
-						val plantName = PlantReminderScheduler.readPlantName(intent).ifBlank { plant.customName }
-						showReminderNotification(context, plantId, plantName)
+							val duePlants = plants.filter { plant ->
+								plant.nextWateringDate <= endOfTodayMillis()
+							}
+
+							if (duePlants.isNotEmpty()) {
+								PlantReminderScheduler.createNotificationChannel(context)
+
+								if (duePlants.size == 1) {
+									val plant = duePlants.first()
+
+									showSinglePlantReminderNotification(
+										context = context,
+										plantId = plant.id,
+										plantName = plant.customName
+									)
+								} else {
+									showDailySummaryNotification(
+										context = context,
+										count = duePlants.size
+									)
+								}
+							}
+						}
+
+						PlantReminderScheduler.scheduleDailyReminderCheck(context)
 					}
 				}
 			} finally {
@@ -65,8 +108,13 @@ class PlantReminderReceiver : BroadcastReceiver() {
 	}
 
 	@SuppressLint("MissingPermission")
-	private fun showReminderNotification(context: Context, plantId: Int, plantName: String) {
+	private fun showSinglePlantReminderNotification(
+		context: Context,
+		plantId: Int,
+		plantName: String
+	) {
 		val openAppIntent = Intent(context, MainActivity::class.java)
+
 		val contentIntent = PendingIntent.getActivity(
 			context,
 			plantId,
@@ -77,10 +125,12 @@ class PlantReminderReceiver : BroadcastReceiver() {
 		val markWateredIntent = PlantReminderScheduler.buildMarkWateredPendingIntent(
 			context = context,
 			plantId = plantId,
-			plantName = plantName
 		)
 
-		val notification = NotificationCompat.Builder(context, PlantReminderScheduler.CHANNEL_ID)
+		val notification = NotificationCompat.Builder(
+			context,
+			PlantReminderScheduler.CHANNEL_ID
+		)
 			.setSmallIcon(R.mipmap.ic_launcher)
 			.setContentTitle(context.getString(R.string.notification_title_watering_reminder))
 			.setContentText(context.getString(R.string.notification_text_time_to_water, plantName))
@@ -95,5 +145,54 @@ class PlantReminderReceiver : BroadcastReceiver() {
 			.build()
 
 		NotificationManagerCompat.from(context).notify(plantId, notification)
+	}
+
+	@SuppressLint("MissingPermission")
+	private fun showDailySummaryNotification(
+		context: Context,
+		count: Int
+	) {
+		val openAppIntent = Intent(context, MainActivity::class.java)
+
+		val contentIntent = PendingIntent.getActivity(
+			context,
+			PlantReminderScheduler.DAILY_NOTIFICATION_ID,
+			openAppIntent,
+			PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+		)
+
+		val notification = NotificationCompat.Builder(
+			context,
+			PlantReminderScheduler.CHANNEL_ID
+		)
+			.setSmallIcon(R.mipmap.ic_launcher)
+			.setContentTitle(context.getString(R.string.notification_title_watering_reminder))
+			.setContentText(
+				context.resources.getQuantityString(
+					R.plurals.notification_text_multiple_plants_due,
+					count,
+					count
+				)
+			)
+			.setPriority(NotificationCompat.PRIORITY_DEFAULT)
+			.setAutoCancel(true)
+			.setContentIntent(contentIntent)
+			.build()
+
+		NotificationManagerCompat.from(context).notify(
+			PlantReminderScheduler.DAILY_NOTIFICATION_ID,
+			notification
+		)
+	}
+
+	private fun endOfTodayMillis(): Long {
+		val zoneId = ZoneId.systemDefault()
+
+		return LocalDate
+			.now(zoneId)
+			.plusDays(1)
+			.atStartOfDay(zoneId)
+			.toInstant()
+			.toEpochMilli() - 1
 	}
 }

@@ -19,8 +19,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
@@ -37,7 +37,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalContext
@@ -49,12 +48,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.snap
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
@@ -293,52 +287,9 @@ private fun PlantCardContent(
 }
 
 @Composable
-private fun PulsingAddFab(
-    onClick: () -> Unit
+private fun MyGardenHeader(
+    onAddClick: () -> Unit
 ) {
-    val pulseColor = MaterialTheme.colorScheme.primary
-    val infinite = rememberInfiniteTransition(label = "addFabPulse")
-    val pulseScale by infinite.animateFloat(
-        initialValue = 0.9f,
-        targetValue = 1.35f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 1500, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "pulseScale"
-    )
-    val pulseAlpha by infinite.animateFloat(
-        initialValue = 0.30f,
-        targetValue = 0f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 1500, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "pulseAlpha"
-    )
-
-    Box(contentAlignment = Alignment.Center) {
-        Box(
-            modifier = Modifier
-                .size(64.dp)
-                .graphicsLayer {
-                    scaleX = pulseScale
-                    scaleY = pulseScale
-                    alpha = pulseAlpha
-                }
-                .background(pulseColor.copy(alpha = 0.45f), CircleShape)
-        )
-        FloatingActionButton(
-            onClick = onClick,
-            shape = CircleShape
-        ) {
-            Icon(Icons.Default.Add, contentDescription = stringResource(R.string.my_garden_fab_cd))
-        }
-    }
-}
-
-@Composable
-private fun MyGardenHeader() {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -354,21 +305,34 @@ private fun MyGardenHeader() {
             .padding(horizontal = 24.dp, vertical = 20.dp),
         contentAlignment = Alignment.BottomStart
     ) {
-        Column {
-            Text(
-                text = stringResource(R.string.my_garden_title),
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                modifier = Modifier.semantics { heading() }
-            )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Bottom
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.my_garden_title),
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.semantics { heading() }
+                )
 
-            Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(4.dp))
 
-            Text(
-                text = stringResource(R.string.my_garden_tagline),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.75f)
-            )
+                Text(
+                    text = stringResource(R.string.my_garden_tagline),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.75f)
+                )
+            }
+            IconButton(onClick = onAddClick) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = stringResource(R.string.my_garden_fab_cd),
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
         }
     }
 }
@@ -447,12 +411,7 @@ fun MyGardenScreen(
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
-            MyGardenHeader()
-        },
-        floatingActionButton = {
-            if (!isSelectionMode) {
-                PulsingAddFab(onClick = onNavigateToSearch)
-            }
+            MyGardenHeader(onAddClick = onNavigateToSearch)
         }
     ) { paddingValues ->
 
