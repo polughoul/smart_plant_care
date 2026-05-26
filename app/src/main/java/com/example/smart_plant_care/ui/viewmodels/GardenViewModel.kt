@@ -6,6 +6,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.smart_plant_care.data.local.entity.MyPlantEntity
 import com.example.smart_plant_care.data.local.entity.WateringEventEntity
+import com.example.smart_plant_care.data.remote.dto.CareSectionDto
+import com.example.smart_plant_care.data.remote.dto.PlantDetailsDto
+import com.example.smart_plant_care.data.remote.dto.bestImageUrl
 import com.example.smart_plant_care.data.repository.InsertPlantResult
 import com.example.smart_plant_care.data.repository.PlantRepository
 import kotlinx.coroutines.flow.Flow
@@ -50,6 +53,109 @@ class GardenViewModel(private val repository: PlantRepository) : ViewModel() {
         viewModelScope.launch {
             repository.updatePlant(plant)
         }
+    }
+
+    fun addPlantFromDetails(
+        context: Context,
+        detailsDto: PlantDetailsDto,
+        defaultWaterDays: Int,
+        careSections: List<CareSectionDto>,
+        onResult: ((InsertPlantResult) -> Unit)? = null
+    ) {
+        val careGuideWatering = careSections
+            .firstOrNull { it.type.equals("watering", ignoreCase = true) }
+            ?.description
+            ?.takeIf { it.isNotBlank() }
+        val careGuideSunlight = careSections
+            .firstOrNull { it.type.equals("sunlight", ignoreCase = true) }
+            ?.description
+            ?.takeIf { it.isNotBlank() }
+        val careGuidePruning = careSections
+            .firstOrNull { it.type.equals("pruning", ignoreCase = true) }
+            ?.description
+            ?.takeIf { it.isNotBlank() }
+
+        val newPlant = MyPlantEntity(
+            customName = detailsDto.commonName,
+            speciesName = detailsDto.commonName,
+            remotePlantId = detailsDto.id,
+            scientificName = detailsDto.scientificName?.firstOrNull(),
+            family = detailsDto.family,
+            origin = detailsDto.origin?.joinToString(),
+            plantType = detailsDto.type,
+            sunlight = detailsDto.sunlight?.joinToString(),
+            attracts = detailsDto.attracts?.joinToString(),
+            pruningMonths = detailsDto.pruningMonths?.joinToString(),
+            pruningCountAmount = detailsDto.pruningCount?.amount,
+            pruningCountInterval = detailsDto.pruningCount?.interval,
+            growthRate = detailsDto.growthRate,
+            soil = detailsDto.soil?.joinToString(),
+            rare = detailsDto.rare,
+            careGuideWatering = careGuideWatering,
+            careGuideSunlight = careGuideSunlight,
+            careGuidePruning = careGuidePruning,
+            description = detailsDto.description,
+            waterIntervalDays = defaultWaterDays,
+            nextWateringDate = calculateNextWateringDateMillis(defaultWaterDays),
+            fruitingSeason = detailsDto.fruitingSeason,
+            harvestSeason = detailsDto.harvestSeason,
+            harvestMethod = detailsDto.harvestMethod,
+            isMedicinal = detailsDto.medicinal,
+            isPoisonousToHumans = detailsDto.poisonousToHumans,
+            isPoisonousToPets = detailsDto.poisonousToPets,
+            imageUrl = detailsDto.defaultImage.bestImageUrl()
+        )
+        insertPlantWithImageCaching(context, newPlant, onResult)
+    }
+
+    fun addManualPlant(
+        speciesName: String?,
+        customName: String,
+        waterDays: Int,
+        imageUrl: String?
+    ) {
+        val newPlant = MyPlantEntity(
+            customName = customName,
+            speciesName = speciesName,
+            scientificName = null,
+            family = null,
+            origin = null,
+            plantType = null,
+            sunlight = null,
+            attracts = null,
+            pruningMonths = null,
+            pruningCountAmount = null,
+            pruningCountInterval = null,
+            growthRate = null,
+            soil = null,
+            rare = null,
+            description = null,
+            waterIntervalDays = waterDays,
+            nextWateringDate = calculateNextWateringDateMillis(waterDays),
+            fruitingSeason = null,
+            harvestSeason = null,
+            harvestMethod = null,
+            isMedicinal = null,
+            isPoisonousToHumans = null,
+            isPoisonousToPets = null,
+            imageUrl = imageUrl
+        )
+        insertPlant(newPlant)
+    }
+
+    fun updatePlantFromEdit(
+        plant: MyPlantEntity,
+        customName: String,
+        waterDays: Int,
+        imageUrl: String?
+    ) {
+        val updatedPlant = plant.copy(
+            customName = customName,
+            waterIntervalDays = waterDays,
+            nextWateringDate = calculateNextWateringDateMillis(waterDays),
+            imageUrl = imageUrl
+        )
+        updatePlant(updatedPlant)
     }
 
     fun markPlantAsWatered(plantId: Int) {
@@ -116,6 +222,10 @@ class GardenViewModel(private val repository: PlantRepository) : ViewModel() {
                 }
             }
         }
+    }
+
+    private fun calculateNextWateringDateMillis(days: Int): Long {
+        return System.currentTimeMillis() + (days * 24L * 60L * 60L * 1000L)
     }
 }
 class GardenViewModelFactory(private val repository: PlantRepository) : ViewModelProvider.Factory {
