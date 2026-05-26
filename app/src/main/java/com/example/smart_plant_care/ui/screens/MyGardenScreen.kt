@@ -67,6 +67,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import kotlin.math.roundToInt
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
@@ -608,11 +609,16 @@ fun MyGardenScreen(
                             selectedPlantIds = selectedPlantIds - pendingDeleteIds
                             pendingDeleteIds = emptySet()
                             scope.launch {
+                                val autoDismissJob = launch {
+                                    delay(3_000L)
+                                    snackbarHostState.currentSnackbarData?.dismiss()
+                                }
                                 val result = snackbarHostState.showSnackbar(
                                     message = deletedMessage,
                                     actionLabel = undoLabel,
                                     duration = SnackbarDuration.Indefinite
                                 )
+                                autoDismissJob.cancel()
                                 if (result == SnackbarResult.ActionPerformed) {
                                     deletedPlants.forEach { plant ->
                                         viewModel.insertPlant(plant)

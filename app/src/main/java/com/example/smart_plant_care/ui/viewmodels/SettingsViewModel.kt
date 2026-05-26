@@ -1,7 +1,8 @@
 package com.example.smart_plant_care.ui.viewmodels
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import android.content.Context
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.smart_plant_care.data.preferences.ThemeMode
 import com.example.smart_plant_care.data.preferences.UserPreferencesDataStore
@@ -16,9 +17,9 @@ data class SettingsUiState(
     val notificationsEnabled: Boolean = true
 )
 
-class SettingsViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val preferencesDataStore = UserPreferencesDataStore(application.applicationContext)
+class SettingsViewModel(
+    private val preferencesDataStore: UserPreferencesDataStore
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
@@ -45,6 +46,22 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         viewModelScope.launch {
             preferencesDataStore.setNotificationsEnabled(enabled)
         }
+    }
+}
+
+class SettingsViewModelFactory(
+    context: Context
+) : ViewModelProvider.Factory {
+    private val appContext = context.applicationContext
+
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(SettingsViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return SettingsViewModel(
+                UserPreferencesDataStore(appContext)
+            ) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
 

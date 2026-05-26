@@ -1,5 +1,6 @@
 package com.example.smart_plant_care.ui.viewmodels
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -15,6 +16,8 @@ import kotlinx.coroutines.launch
 
 
 class GardenViewModel(private val repository: PlantRepository) : ViewModel() {
+    private val imageCacheAttempts = mutableSetOf<Int>()
+
     val plantsList: StateFlow<List<MyPlantEntity>> = repository.getAllPlants()
         .stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(5000), initialValue = emptyList())
 
@@ -27,6 +30,18 @@ class GardenViewModel(private val repository: PlantRepository) : ViewModel() {
     fun insertPlant(plant: MyPlantEntity, onResult: ((InsertPlantResult) -> Unit)? = null) {
         viewModelScope.launch {
             val result = repository.insertPlant(plant)
+            onResult?.invoke(result)
+        }
+    }
+
+    fun insertPlantWithImageCaching(
+        context: Context,
+        plant: MyPlantEntity,
+        onResult: ((InsertPlantResult) -> Unit)? = null
+    ) {
+        viewModelScope.launch {
+            val cachedPlant = repository.cacheRemoteImageForPlant(context, plant)
+            val result = repository.insertPlant(cachedPlant)
             onResult?.invoke(result)
         }
     }
@@ -80,6 +95,26 @@ class GardenViewModel(private val repository: PlantRepository) : ViewModel() {
         viewModelScope.launch {
             repository.replaceDemoDuePlants(count = count)
             onComplete?.invoke()
+        }
+    }
+
+    fun cacheRemoteImagesForExistingPlants(context: Context, plants: List<MyPlantEntity>) {
+        plants.forEach { plant ->
+            val imageUrl = plant.imageUrl ?: return@forEach
+            val isRemote = imageUrl.startsWith("http://", ignoreCase = true) ||
+                imageUrl.startsWith("https://", ignoreCase = true)
+
+            if (!isRemote || plant.id <= 0 || imageCacheAttempts.contains(plant.id)) {
+                return@forEach
+            }
+
+            imageCacheAttempts.add(plant.id)
+            viewModelScope.launch {
+                val cached = repository.cacheRemoteImageForPlant(context, plant)
+                if (cached.imageUrl != plant.imageUrl) {
+                    repository.updatePlant(cached)
+                }
+            }
         }
     }
 }

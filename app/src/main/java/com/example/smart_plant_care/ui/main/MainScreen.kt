@@ -82,6 +82,10 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
         }
     }
 
+    LaunchedEffect(allPlants) {
+        gardenViewModel.cacheRemoteImagesForExistingPlants(context, allPlants)
+    }
+
 
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -304,7 +308,7 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
                             isPoisonousToPets = detailsDto.poisonousToPets,
                             imageUrl = detailsDto.defaultImage.bestImageUrl()
                         )
-                        gardenViewModel.insertPlant(newPlant) { result ->
+                        gardenViewModel.insertPlantWithImageCaching(context, newPlant) { result ->
                             when (result) {
                                 InsertPlantResult.Added -> {
                                     navController.popBackStack(Screen.MyGarden.route, inclusive = false)
