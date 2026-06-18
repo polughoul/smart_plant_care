@@ -13,11 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -27,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -48,7 +44,7 @@ fun HelpScreen(onBackClick: () -> Unit) {
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            painter = painterResource(R.drawable.ic_arrow_back),
                             contentDescription = stringResource(R.string.common_cd_back)
                         )
                     }
@@ -67,17 +63,17 @@ fun HelpScreen(onBackClick: () -> Unit) {
             HelpSection(
                 title = stringResource(R.string.help_section_watering_title),
                 body = stringResource(R.string.help_section_watering_body),
-                icons = listOf(Icons.Default.Check)
+                icons = listOf(R.drawable.ic_check)
             )
             HelpSection(
                 title = stringResource(R.string.help_section_edit_title),
                 body = stringResource(R.string.help_section_edit_body),
-                icons = listOf(Icons.Default.Edit)
+                icons = listOf(R.drawable.ic_edit)
             )
             HelpSection(
                 title = stringResource(R.string.help_section_history_title),
                 body = stringResource(R.string.help_section_history_body),
-                icons = listOf(Icons.Default.Delete)
+                icons = listOf(R.drawable.ic_delete)
             )
             HelpSection(
                 title = stringResource(R.string.help_section_search_title),
@@ -95,7 +91,7 @@ fun HelpScreen(onBackClick: () -> Unit) {
 private fun HelpSection(
     title: String,
     body: String,
-    icons: List<androidx.compose.ui.graphics.vector.ImageVector> = emptyList()
+    icons: List<Int> = emptyList()
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(text = title, style = MaterialTheme.typography.titleMedium)
@@ -104,7 +100,7 @@ private fun HelpSection(
             Row(modifier = Modifier.fillMaxWidth()) {
                 icons.forEach { icon ->
                     Icon(
-                        imageVector = icon,
+                        painter = painterResource(icon),
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(20.dp)

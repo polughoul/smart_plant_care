@@ -19,10 +19,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -50,8 +46,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.foundation.Image
 import androidx.compose.ui.res.painterResource
@@ -166,20 +160,20 @@ fun PlantCard(
             ) {
                 IconButton(onClick = onWaterClick) {
                     Icon(
-                        imageVector = Icons.Default.Check,
+                        painter = painterResource(R.drawable.ic_check),
                         contentDescription = stringResource(R.string.cd_action_mark_watered),
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
                 IconButton(onClick = onEditClick) {
                     Icon(
-                        imageVector = Icons.Default.Edit,
+                        painter = painterResource(R.drawable.ic_edit),
                         contentDescription = stringResource(R.string.cd_action_edit)
                     )
                 }
                 IconButton(onClick = onDeleteClick) {
                     Icon(
-                        imageVector = Icons.Default.Delete,
+                        painter = painterResource(R.drawable.ic_delete),
                         contentDescription = stringResource(R.string.cd_action_delete),
                         tint = MaterialTheme.colorScheme.error
                     )
@@ -329,7 +323,7 @@ private fun MyGardenHeader(
             }
             IconButton(onClick = onAddClick) {
                 Icon(
-                    imageVector = Icons.Default.Add,
+                    painter = painterResource(R.drawable.ic_add),
                     contentDescription = stringResource(R.string.my_garden_fab_cd),
                     tint = MaterialTheme.colorScheme.onPrimaryContainer
                 )
@@ -448,11 +442,11 @@ fun MyGardenScreen(
                         IconButton(
                             onClick = { sortExpanded = true }
                         ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.Sort,
-                                contentDescription = stringResource(R.string.my_garden_sort_label)
-                            )
-                        }
+                        Icon(
+                            painter = painterResource(R.drawable.ic_sort),
+                            contentDescription = stringResource(R.string.my_garden_sort_label)
+                        )
+                    }
 
                         DropdownMenu(
                             expanded = sortExpanded,
@@ -466,7 +460,7 @@ fun MyGardenScreen(
                                     leadingIcon = {
                                         if (option == sortOption) {
                                             Icon(
-                                                imageVector = Icons.Default.Check,
+                                                painter = painterResource(R.drawable.ic_check),
                                                 contentDescription = null
                                             )
                                         } else {

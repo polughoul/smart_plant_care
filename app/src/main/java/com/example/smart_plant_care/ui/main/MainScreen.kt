@@ -1,10 +1,6 @@
 package com.example.smart_plant_care.ui.main
 
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -22,6 +18,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -99,7 +96,7 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
                     NavigationBarItem(
                         icon = {
                             Icon(
-                                Icons.Default.Home,
+                                painter = painterResource(R.drawable.ic_home),
                                 contentDescription = stringResource(R.string.nav_cd_garden)
                             )
                         },
@@ -123,7 +120,7 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
                     NavigationBarItem(
                         icon = {
                             Icon(
-                                Icons.Default.Search,
+                                painter = painterResource(R.drawable.ic_search),
                                 contentDescription = stringResource(R.string.nav_cd_search)
                             )
                         },
@@ -147,7 +144,7 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
                     NavigationBarItem(
                         icon = {
                             Icon(
-                                Icons.Default.Settings,
+                                painter = painterResource(R.drawable.ic_settings),
                                 contentDescription = stringResource(R.string.nav_cd_settings)
                             )
                         },

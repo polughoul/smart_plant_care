@@ -5,15 +5,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.semantics.heading
@@ -48,7 +45,10 @@ fun SearchScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.search_cd_back))
+                        Icon(
+                            painter = painterResource(R.drawable.ic_arrow_back),
+                            contentDescription = stringResource(R.string.search_cd_back)
+                        )
                     }
                 }
             )
@@ -71,7 +71,10 @@ fun SearchScreen(
                 keyboardActions = KeyboardActions(onSearch = { searchViewModel.searchPlants(searchQuery) }),
                 trailingIcon = {
                     IconButton(onClick = { searchViewModel.searchPlants(searchQuery) }) {
-                        Icon(Icons.Default.Search, contentDescription = stringResource(R.string.search_cd_action))
+                        Icon(
+                            painter = painterResource(R.drawable.ic_search),
+                            contentDescription = stringResource(R.string.search_cd_action)
+                        )
                     }
                 }
             )
@@ -83,7 +86,10 @@ fun SearchScreen(
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
             ) {
-                Icon(Icons.Default.Add, contentDescription = null)
+                Icon(
+                    painter = painterResource(R.drawable.ic_add),
+                    contentDescription = null
+                )
                 Spacer(Modifier.width(8.dp))
                 Text(stringResource(R.string.search_create_new))
             }
