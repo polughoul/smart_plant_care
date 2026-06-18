@@ -63,25 +63,6 @@ object PlantReminderScheduler {
         )
     }
 
-    fun scheduleDailyReminderCheckIn5Seconds(context: Context) {
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val pendingIntent = buildDailyReminderPendingIntent(context)
-        val triggerAtMillis = System.currentTimeMillis() + 5_000L
-
-        alarmManager.setAndAllowWhileIdle(
-            AlarmManager.RTC_WAKEUP,
-            triggerAtMillis,
-            pendingIntent
-        )
-    }
-
-    fun triggerDailyReminderCheckNow(context: Context) {
-        val intent = Intent(context, PlantReminderReceiver::class.java).apply {
-            action = ACTION_DAILY_REMINDER_CHECK
-        }
-        context.sendBroadcast(intent)
-    }
-
     fun cancelDailyReminderCheck(context: Context) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val pendingIntent = buildDailyReminderPendingIntent(context)

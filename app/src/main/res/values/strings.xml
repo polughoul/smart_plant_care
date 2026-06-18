@@ -9,12 +9,6 @@
     <string name="settings_reminders_title">Watering reminders</string>
     <string name="settings_reminders_subtitle">Use this switch to enable notifications later.</string>
     <string name="settings_notification_permission_denied">Notifications are enabled, but permission is denied in system settings.</string>
-    <string name="settings_demo_title">Demo reminders</string>
-    <string name="settings_demo_subtitle">Use these buttons to test real daily reminder logic in 5 seconds.</string>
-    <string name="settings_demo_test_single">Test 1 plant reminder in 5s</string>
-    <string name="settings_demo_test_multiple">Test 3 plants reminder in 5s</string>
-    <string name="settings_demo_snackbar_single">Single demo reminder will appear in about 5 seconds</string>
-    <string name="settings_demo_snackbar_multiple">Multiple demo reminder will appear in about 5 seconds</string>
 
     <string name="notification_title_watering_reminder">Watering reminder</string>
     <string name="notification_text_time_to_water">Time to water %1$s</string>

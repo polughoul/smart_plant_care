@@ -218,29 +218,7 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
             composable(Screen.Settings.route) {
                 SettingsScreen(
                     settingsViewModel = settingsViewModel,
-                    onOpenHelp = { navController.navigate(Screen.Help.route) },
-                    onTestSingleReminder = {
-                        gardenViewModel.createDemoDuePlant {
-                            scope.launch {
-                                snackbarHostState.showSnackbar(
-                                    context.getString(R.string.settings_demo_snackbar_single)
-                                )
-                                delay(5_000L)
-                                PlantReminderScheduler.triggerDailyReminderCheckNow(context)
-                            }
-                        }
-                    },
-                    onTestMultipleReminder = {
-                        gardenViewModel.createDemoDuePlants(3) {
-                            scope.launch {
-                                snackbarHostState.showSnackbar(
-                                    context.getString(R.string.settings_demo_snackbar_multiple)
-                                )
-                                delay(5_000L)
-                                PlantReminderScheduler.triggerDailyReminderCheckNow(context)
-                            }
-                        }
-                    }
+                    onOpenHelp = { navController.navigate(Screen.Help.route) }
                 )
             }
             composable(Screen.Search.route) {

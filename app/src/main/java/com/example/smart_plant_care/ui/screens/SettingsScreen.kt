@@ -13,7 +13,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.clickable
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -45,9 +44,7 @@ private const val POST_NOTIFICATIONS_PERMISSION = "android.permission.POST_NOTIF
 @OptIn(ExperimentalMaterial3Api::class)
 fun SettingsScreen(
     settingsViewModel: SettingsViewModel,
-    onOpenHelp: () -> Unit,
-    onTestSingleReminder: () -> Unit = {},
-    onTestMultipleReminder: () -> Unit = {}
+    onOpenHelp: () -> Unit
 ) {
     val uiState by settingsViewModel.uiState.collectAsState()
     val context = LocalContext.current
@@ -156,39 +153,6 @@ fun SettingsScreen(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.error
                 )
-            }
-
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.settings_demo_title),
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Text(
-                        text = stringResource(R.string.settings_demo_subtitle),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Button(
-                        onClick = onTestSingleReminder,
-                        enabled = uiState.notificationsEnabled && hasNotificationPermission,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(stringResource(R.string.settings_demo_test_single))
-                    }
-                    Button(
-                        onClick = onTestMultipleReminder,
-                        enabled = uiState.notificationsEnabled && hasNotificationPermission,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(stringResource(R.string.settings_demo_test_multiple))
-                    }
-                }
             }
 
             Card(

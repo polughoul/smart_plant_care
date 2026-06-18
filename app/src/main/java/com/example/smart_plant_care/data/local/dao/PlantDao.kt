@@ -32,7 +32,4 @@ interface PlantDao {
 
     @Query("DELETE FROM my_plants WHERE id = :plantId")
     fun deletePlantById(plantId: Int)
-
-    @Query("DELETE FROM my_plants WHERE noteText = :noteText")
-    fun deletePlantsByNoteText(noteText: String)
 }

@@ -190,20 +190,6 @@ class GardenViewModel(private val repository: PlantRepository) : ViewModel() {
         return repository.getAllWateringEvents(plantId)
     }
 
-    fun createDemoDuePlant(onComplete: (() -> Unit)? = null) {
-        viewModelScope.launch {
-            repository.replaceDemoDuePlants(count = 1)
-            onComplete?.invoke()
-        }
-    }
-
-    fun createDemoDuePlants(count: Int, onComplete: (() -> Unit)? = null) {
-        viewModelScope.launch {
-            repository.replaceDemoDuePlants(count = count)
-            onComplete?.invoke()
-        }
-    }
-
     fun cacheRemoteImagesForExistingPlants(context: Context, plants: List<MyPlantEntity>) {
         plants.forEach { plant ->
             val imageUrl = plant.imageUrl ?: return@forEach

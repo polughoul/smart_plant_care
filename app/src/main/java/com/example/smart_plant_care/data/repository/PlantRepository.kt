@@ -21,7 +21,6 @@ sealed interface InsertPlantResult {
 
 class PlantRepository(private val plantDao: PlantDao, private val wateringEventDao: WateringEventDao) {
     companion object {
-        const val DEMO_PLANT_NOTE_MARKER = "__demo_reminder__"
         private const val IMAGE_CACHE_DIR = "plant_images"
     }
 
@@ -80,30 +79,6 @@ class PlantRepository(private val plantDao: PlantDao, private val wateringEventD
                 WateringEventEntity(plantId = plantId, wateredAt = System.currentTimeMillis())
             )
             true
-        }
-    }
-
-    suspend fun replaceDemoDuePlants(count: Int) {
-        val normalizedCount = count.coerceAtLeast(1)
-        withContext(Dispatchers.IO) {
-            plantDao.deletePlantsByNoteText(DEMO_PLANT_NOTE_MARKER)
-            val dueNow = System.currentTimeMillis()
-            repeat(normalizedCount) { index ->
-                val demoName = if (normalizedCount == 1) {
-                    "Demo plant"
-                } else {
-                    "Demo plant ${index + 1}"
-                }
-                plantDao.insertPlant(
-                    MyPlantEntity(
-                        customName = demoName,
-                        speciesName = demoName,
-                        waterIntervalDays = 1,
-                        nextWateringDate = dueNow,
-                        noteText = DEMO_PLANT_NOTE_MARKER
-                    )
-                )
-            }
         }
     }
 
