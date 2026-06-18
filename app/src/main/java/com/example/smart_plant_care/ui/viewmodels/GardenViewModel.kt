@@ -191,17 +191,19 @@ class GardenViewModel(private val repository: PlantRepository) : ViewModel() {
     }
 
     fun cacheRemoteImagesForExistingPlants(context: Context, plants: List<MyPlantEntity>) {
-        plants.forEach { plant ->
-            val imageUrl = plant.imageUrl ?: return@forEach
+        val uncachedRemotePlants = plants.filter { plant ->
+            val imageUrl = plant.imageUrl ?: return@filter false
             val isRemote = imageUrl.startsWith("http://", ignoreCase = true) ||
                 imageUrl.startsWith("https://", ignoreCase = true)
 
-            if (!isRemote || plant.id <= 0 || imageCacheAttempts.contains(plant.id)) {
-                return@forEach
-            }
+            isRemote && plant.id > 0 && !imageCacheAttempts.contains(plant.id)
+        }
 
-            imageCacheAttempts.add(plant.id)
-            viewModelScope.launch {
+        if (uncachedRemotePlants.isEmpty()) return
+
+        imageCacheAttempts.addAll(uncachedRemotePlants.map { it.id })
+        viewModelScope.launch {
+            uncachedRemotePlants.forEach { plant ->
                 val cached = repository.cacheRemoteImageForPlant(context, plant)
                 if (cached.imageUrl != plant.imageUrl) {
                     repository.updatePlant(cached)

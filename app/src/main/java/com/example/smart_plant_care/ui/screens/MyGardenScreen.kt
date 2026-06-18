@@ -51,10 +51,10 @@ import androidx.compose.foundation.Image
 import androidx.compose.ui.res.painterResource
 import com.example.smart_plant_care.ui.util.rememberDayToken
 import com.example.smart_plant_care.R
+import com.example.smart_plant_care.data.local.entity.MyPlantEntity
 import com.example.smart_plant_care.data.preferences.GardenSortOption
 import com.example.smart_plant_care.data.preferences.UserPreferences
 import com.example.smart_plant_care.data.preferences.UserPreferencesDataStore
-import com.example.smart_plant_care.ui.viewmodels.GardenViewModel
 import coil.compose.AsyncImage
 import java.time.Instant
 import java.time.LocalDate
@@ -335,16 +335,15 @@ private fun MyGardenHeader(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyGardenScreen(
-    viewModel: GardenViewModel,
+    plants: List<MyPlantEntity>,
     onNavigateToSearch: () -> Unit,
     onDeletePlant: (Int) -> Unit,
     onMarkPlantWatered: (Int) -> Unit,
     onMarkPlantsWatered: (List<Int>) -> Unit,
     onEditPlant: (Int) -> Unit,
-    onOpenPlantDetails: (Int) -> Unit
+    onOpenPlantDetails: (Int) -> Unit,
+    onRestorePlant: (MyPlantEntity) -> Unit
 ) {
-
-    val plants by viewModel.plantsList.collectAsState()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -615,7 +614,7 @@ fun MyGardenScreen(
                                 autoDismissJob.cancel()
                                 if (result == SnackbarResult.ActionPerformed) {
                                     deletedPlants.forEach { plant ->
-                                        viewModel.insertPlant(plant)
+                                        onRestorePlant(plant)
                                     }
                                 }
                             }

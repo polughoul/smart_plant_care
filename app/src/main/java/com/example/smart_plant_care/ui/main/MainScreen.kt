@@ -63,17 +63,15 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
     val currentRoute = navBackStackEntry?.destination?.route
     val settingsUiState by settingsViewModel.uiState.collectAsState()
     val allPlants by gardenViewModel.plantsList.collectAsState()
+    val plantById = remember(allPlants) { allPlants.associateBy { it.id } }
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = androidx.compose.runtime.rememberCoroutineScope()
 
-    LaunchedEffect(settingsUiState.notificationsEnabled, allPlants) {
+    LaunchedEffect(settingsUiState.notificationsEnabled) {
         if (settingsUiState.notificationsEnabled && PlantReminderScheduler.hasNotificationPermission(context)) {
             PlantReminderScheduler.scheduleDailyReminderCheck(context)
         } else {
             PlantReminderScheduler.cancelDailyReminderCheck(context)
-            allPlants.forEach { plant ->
-                PlantReminderScheduler.cancelReminder(context, plant.id)
-            }
         }
     }
 
@@ -177,7 +175,7 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
         ) {
             composable(Screen.MyGarden.route) {
                 MyGardenScreen(
-                    viewModel = gardenViewModel,
+                    plants = allPlants,
                     onNavigateToSearch = { navController.navigate(Screen.Search.route) },
                     onDeletePlant = { plantId ->
                         gardenViewModel.deletePlant(plantId)
@@ -212,7 +210,8 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
                     },
                     onOpenPlantDetails = { plantId ->
                         navController.navigate(Screen.GardenDetails.createRoute(plantId))
-                    }
+                    },
+                    onRestorePlant = { plant -> gardenViewModel.insertPlant(plant) }
                 )
             }
             composable(Screen.Settings.route) {
@@ -309,8 +308,7 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
             }
             composable(Screen.EditExisting.route) { backStackEntry ->
                 val plantId = backStackEntry.arguments?.getString("plantId")?.toIntOrNull() ?: 0
-                val plants by gardenViewModel.plantsList.collectAsState()
-                val plantToEdit = plants.firstOrNull { it.id == plantId }
+                val plantToEdit = plantById[plantId]
 
                 if (plantToEdit != null) {
                     EditScreen(
@@ -336,8 +334,7 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
             }
             composable(Screen.GardenDetails.route) { backStackEntry ->
                 val plantId = backStackEntry.arguments?.getString("plantId")?.toIntOrNull() ?: 0
-                val plants by gardenViewModel.plantsList.collectAsState()
-                val plant = plants.firstOrNull { it.id == plantId }
+                val plant = plantById[plantId]
                 val recentEvents by gardenViewModel.recentWateringEvents(plantId).collectAsState(initial = emptyList())
 
                 GardenPlantDetailsScreen(
@@ -363,8 +360,7 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
             }
             composable(Screen.PlantNotes.route) { backStackEntry ->
                 val plantId = backStackEntry.arguments?.getString("plantId")?.toIntOrNull() ?: 0
-                val plants by gardenViewModel.plantsList.collectAsState()
-                val plant = plants.firstOrNull { it.id == plantId }
+                val plant = plantById[plantId]
 
                 PlantNotesScreen(
                     plant = plant,
@@ -390,8 +386,7 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
             }
             composable(Screen.PlantDetailsEdit.route) { backStackEntry ->
                 val plantId = backStackEntry.arguments?.getString("plantId")?.toIntOrNull() ?: 0
-                val plants by gardenViewModel.plantsList.collectAsState()
-                val plant = plants.firstOrNull { it.id == plantId }
+                val plant = plantById[plantId]
 
                 PlantDetailsEditScreen(
                     plant = plant,
@@ -404,8 +399,7 @@ fun MainScreen(repository: PlantRepository, settingsViewModel: SettingsViewModel
             }
             composable(Screen.WateringHistory.route) { backStackEntry ->
                 val plantId = backStackEntry.arguments?.getString("plantId")?.toIntOrNull() ?: 0
-                val plants by gardenViewModel.plantsList.collectAsState()
-                val plant = plants.firstOrNull { it.id == plantId }
+                val plant = plantById[plantId]
                 val wateringEvents by gardenViewModel
                     .allWateringEvents(plantId)
                     .collectAsState(initial = emptyList())
